@@ -59,7 +59,7 @@
 
         <quickfixj.version>2.2.0</quickfixj.version>
         <lombok.version>1.18.8</lombok.version>
-        <junit.version>4.12</junit.version>
+        <junit.version>4.13.1</junit.version>
         <mockito-core.version>2.18.3</mockito-core.version>
 
         <cobertura-maven-plugin.version>2.7</cobertura-maven-plugin.version>
