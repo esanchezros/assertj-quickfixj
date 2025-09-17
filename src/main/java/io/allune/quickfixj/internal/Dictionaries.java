@@ -41,7 +41,19 @@ public class Dictionaries {
 
 	public DataDictionary getSessionDataDictionary(String beginString) {
 		DataDictionary dd = sessionOverrides.get(beginString);
-		return dd != null ? dd : dataDictionaryProvider.getSessionDataDictionary(beginString);
+		if (dd != null) return dd;
+		// For FIXT.1.1 application flows, the beginString may be mapped to FIX.5.0* by MessageUtils.toBeginString(ApplVerID)
+		// In those cases, DefaultDataDictionaryProvider expects the application dictionary, not a session one.
+		if ("FIX.5.0SP2".equals(beginString)) {
+			return getApplicationDataDictionary("9"); // ApplVerID.FIX50SP2
+		}
+		if ("FIX.5.0SP1".equals(beginString)) {
+			return getApplicationDataDictionary("8"); // ApplVerID.FIX50SP1
+		}
+		if ("FIX.5.0".equals(beginString)) {
+			return getApplicationDataDictionary("7"); // ApplVerID.FIX50
+		}
+		return dataDictionaryProvider.getSessionDataDictionary(beginString);
 	}
 
 	public void addDataDictionary(String beginString, DataDictionary dataDictionary) {
