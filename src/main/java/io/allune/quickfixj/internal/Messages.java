@@ -43,6 +43,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 import static io.allune.quickfixj.error.FieldShouldHaveTag.fieldShouldHaveTag;
+import static io.allune.quickfixj.error.UnsupportedFieldType.unsupportedFieldType;
 import static io.allune.quickfixj.error.FieldShouldHaveValue.fieldShouldHaveValue;
 import static io.allune.quickfixj.error.ShouldBeOfType.shouldBeOfType;
 import static io.allune.quickfixj.error.ShouldHaveField.shouldHaveField;
@@ -98,11 +99,11 @@ public class Messages {
 
 	private void assertSameMsgType(AssertionInfo info, Message actual, String expectedMessageType) {
 		try {
-			String actualMessageType = getMessageType(actual.toString());
+			String actualMessageType = actual.getHeader().getString(MsgType.FIELD);
 			if (!actualMessageType.equals(expectedMessageType)) {
 				throw failures.failure(info, shouldBeOfType(actual, actualMessageType, expectedMessageType));
 			}
-		} catch (InvalidMessage invalidMessage) {
+		} catch (FieldNotFound e) {
 			throw failures.failure(info, shouldHaveField(actual, MsgType.FIELD));
 		}
 	}
@@ -135,8 +136,7 @@ public class Messages {
 	private Object getActualValue(AssertionInfo info, FieldMap actual, Class<? extends Field<?>> actualFieldClass, int actualFieldTag) {
 		ThrowingBiFunction<FieldMap, Integer, Object> fieldValueFunction = quickfixClassToObject.get(actualFieldClass.getSuperclass());
 		if (fieldValueFunction == null) {
-			// TODO: Field type not supported
-			throw failures.failure(info, fieldShouldHaveTag(actualFieldClass));
+			throw failures.failure(info, unsupportedFieldType(actualFieldClass));
 		}
 
 		try {
@@ -152,19 +152,14 @@ public class Messages {
 	}
 
 	public String determineBeginString(AssertionInfo info, Message message) {
-		objects.assertNotNull(info, message); // TODO: might need to remove
+		objects.assertNotNull(info, message);
 
-		try {
-			String beginString = getBeginString(info, message);
-			if (beginString.equals(BEGINSTRING_FIXT11)) {
-				String applVerId = getApplVerId(info, message);
-				return toBeginString(new ApplVerID(applVerId));
-			} else {
-				return beginString;
-			}
-		} catch (FieldNotFoundException ex) {
-			return null;
+		String beginString = getBeginString(info, message);
+		if (beginString.equals(BEGINSTRING_FIXT11)) {
+			String applVerId = getApplVerId(info, message);
+			return toBeginString(new ApplVerID(applVerId));
 		}
+		return beginString;
 	}
 
 	public String getBeginString(AssertionInfo info, Message message) {
@@ -179,12 +174,11 @@ public class Messages {
 		try {
 			return message.getHeader().getString(actualField);
 		} catch (FieldNotFound fieldNotFound) {
-//			throw failures.failure(info, shouldHaveField(actualClazz, actualField));
-			throw new FieldNotFoundException(fieldNotFound.getMessage(), fieldNotFound);
+			throw failures.failure(info, shouldHaveField(actualClazz, actualField));
 		}
 	}
 
-	public Object getFieldValue(int fieldTag, String beginString, FieldMap actual) throws IncorrectDataFormat {
+	public Object getFieldValue(int fieldTag, String beginString, FieldMap actual) throws FieldNotFoundException {
 		DataDictionary dataDictionary = dictionaries.getSessionDataDictionary(beginString);
 		FieldType fieldType = dataDictionary.getFieldType(fieldTag);
 		if (fieldType == null) {
@@ -234,7 +228,7 @@ public class Messages {
 					throw new RuntimeException("Unsupported");
 			}
 		} catch (FieldNotFound e) {
-			throw new IncorrectDataFormat(fieldTag, "");
+			throw new FieldNotFoundException(e.getMessage(), e);
 		}
 	}
 }

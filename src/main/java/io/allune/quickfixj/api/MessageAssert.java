@@ -105,7 +105,7 @@ import static quickfix.field.MsgType.XML_MESSAGE;
  */
 public class MessageAssert extends AbstractFieldMapAssert<MessageAssert, Message> {
 
-	private final String beginString;
+	private String beginString;
 
 	/**
 	 * Creates a new {@link MessageAssert}.
@@ -114,11 +114,15 @@ public class MessageAssert extends AbstractFieldMapAssert<MessageAssert, Message
 	 */
 	public MessageAssert(Message message) {
 		super(message, MessageAssert.class);
-		this.beginString = messages.determineBeginString(info, actual);
+		// Defer beginString resolution until first needed to avoid asserting during construction
+		this.beginString = null;
 	}
 
 	@Override
 	public String getBeginString() {
+		if (beginString == null) {
+			beginString = messages.determineBeginString(info, actual);
+		}
 		return beginString;
 	}
 
@@ -290,7 +294,7 @@ public class MessageAssert extends AbstractFieldMapAssert<MessageAssert, Message
 		isNotNull();
 		if (actual.getHeader() == null)
 			throw failures.failure(info, shouldHaveHeader(actual));
-		return new MessageHeaderAssert(actual.getHeader(), this, beginString);
+		return new MessageHeaderAssert(actual.getHeader(), this, getBeginString());
 	}
 
 	/**
@@ -300,7 +304,7 @@ public class MessageAssert extends AbstractFieldMapAssert<MessageAssert, Message
 		isNotNull();
 		if (actual.getTrailer() == null)
 			throw failures.failure(info, shouldHaveTrailer(actual));
-		return new MessageTrailerAssert(actual.getTrailer(), this, beginString);
+		return new MessageTrailerAssert(actual.getTrailer(), this, getBeginString());
 	}
 
 	/**
@@ -875,7 +879,7 @@ public class MessageAssert extends AbstractFieldMapAssert<MessageAssert, Message
 	 * @return {@code this} assertion object.
 	 */
 	public MessageAssert hasMsgTypeName(String expectedMsgTypeName) {
-		messages.assertMessageIsOfTypeName(info, actual, beginString, expectedMsgTypeName);
+		messages.assertMessageIsOfTypeName(info, actual, getBeginString(), expectedMsgTypeName);
 		return this;
 	}
 

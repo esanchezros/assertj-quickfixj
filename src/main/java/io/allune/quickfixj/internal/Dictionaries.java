@@ -15,6 +15,9 @@ package io.allune.quickfixj.internal;
 import quickfix.DataDictionary;
 import quickfix.DefaultDataDictionaryProvider;
 
+import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
+
 /**
  * @author Eduardo Sanchez-Ros
  */
@@ -23,6 +26,10 @@ public class Dictionaries {
 	private static final Dictionaries INSTANCE = new Dictionaries();
 
 	private static final DefaultDataDictionaryProvider dataDictionaryProvider = new DefaultDataDictionaryProvider();
+
+	// Local overrides to allow dynamic registration from tests/clients without relying on provider add* APIs
+	private final Map<String, DataDictionary> sessionOverrides = new ConcurrentHashMap<>();
+	private final Map<String, DataDictionary> applicationOverrides = new ConcurrentHashMap<>();
 
 	private Dictionaries() {
 		//
@@ -33,10 +40,20 @@ public class Dictionaries {
 	}
 
 	public DataDictionary getSessionDataDictionary(String beginString) {
-		return dataDictionaryProvider.getSessionDataDictionary(beginString);
+		DataDictionary dd = sessionOverrides.get(beginString);
+		return dd != null ? dd : dataDictionaryProvider.getSessionDataDictionary(beginString);
 	}
 
 	public void addDataDictionary(String beginString, DataDictionary dataDictionary) {
-		dataDictionaryProvider.addTransportDictionary(beginString, dataDictionary);
+		sessionOverrides.put(beginString, dataDictionary);
+	}
+
+	public DataDictionary getApplicationDataDictionary(String applVerId) {
+		DataDictionary dd = applicationOverrides.get(applVerId);
+		return dd != null ? dd : dataDictionaryProvider.getApplicationDataDictionary(new quickfix.field.ApplVerID(applVerId));
+	}
+
+	public void addApplicationDataDictionary(String applVerId, DataDictionary dataDictionary) {
+		applicationOverrides.put(applVerId, dataDictionary);
 	}
 }
