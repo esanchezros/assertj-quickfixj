@@ -12,6 +12,7 @@
  */
 package io.allune.quickfixj.api;
 
+import io.allune.quickfixj.exception.FieldNotFoundException;
 import io.allune.quickfixj.internal.Dictionaries;
 import io.allune.quickfixj.internal.Messages;
 import io.allune.quickfixj.internal.Versions;
@@ -102,6 +103,8 @@ public abstract class AbstractFieldMapAssert<SELF extends AbstractFieldMapAssert
 			Object actualFieldValue = messages.getFieldValue(expectedFieldTag, getBeginString(), this.actual);
 			if (!expectedFieldValue.equals(actualFieldValue))
 				throw failures.failure(info, fieldShouldHaveValue(actual, expectedFieldTag, actualFieldValue, expectedFieldValue));
+		} catch (FieldNotFoundException ex) {
+			throw failures.failure(info, shouldHaveField(actual, expectedFieldTag));
 		} catch (Exception ex) {
 			throw new RuntimeException(ex.getMessage(), ex);
 		}

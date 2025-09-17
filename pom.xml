@@ -24,8 +24,8 @@
         <tag>HEAD</tag>
     </scm>
     <ciManagement>
-        <system>jenkins</system>
-        <url>https://travis-ci.org/github/esanchezros/assertj-quickfixj</url>
+        <system>GitHub Actions</system>
+        <url>https://github.com/esanchezros/assertj-quickfixj/actions</url>
     </ciManagement>
     <issueManagement>
         <system>github</system>
@@ -57,9 +57,10 @@
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
 
-        <quickfixj.version>2.2.0</quickfixj.version>
-        <lombok.version>1.18.8</lombok.version>
+        <quickfixj.version>2.3.2</quickfixj.version>
+        <lombok.version>1.18.34</lombok.version>
         <junit.version>4.12</junit.version>
+        <junit.jupiter.version>5.11.3</junit.jupiter.version>
         <mockito-core.version>2.18.3</mockito-core.version>
 
         <cobertura-maven-plugin.version>2.7</cobertura-maven-plugin.version>
@@ -70,7 +71,7 @@
         <maven-deploy-plugin.version>2.8.2</maven-deploy-plugin.version>
         <maven-install-plugin.version>2.5.2</maven-install-plugin.version>
         <maven-resources-plugin.version>3.1.0</maven-resources-plugin.version>
-        <maven-compiler-plugin.version>3.7.0</maven-compiler-plugin.version>
+        <maven-compiler-plugin.version>3.11.0</maven-compiler-plugin.version>
         <maven-surefire-plugin.version>2.21.0</maven-surefire-plugin.version>
         <maven-release-plugin.version>2.5.3</maven-release-plugin.version>
         <nexus-staging-maven-plugin.version>1.6.8</nexus-staging-maven-plugin.version>
@@ -103,6 +104,24 @@
             <scope>provided</scope>
         </dependency>
         <!-- test dependencies -->
+        <dependency>
+            <groupId>org.junit.jupiter</groupId>
+            <artifactId>junit-jupiter-api</artifactId>
+            <version>${junit.jupiter.version}</version>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.junit.jupiter</groupId>
+            <artifactId>junit-jupiter-engine</artifactId>
+            <version>${junit.jupiter.version}</version>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.junit.vintage</groupId>
+            <artifactId>junit-vintage-engine</artifactId>
+            <version>${junit.jupiter.version}</version>
+            <scope>test</scope>
+        </dependency>
         <dependency>
             <groupId>junit</groupId>
             <artifactId>junit</artifactId>
@@ -182,17 +201,25 @@
                     <source>1.8</source>
                     <target>1.8</target>
                     <encoding>${project.build.sourceEncoding}</encoding>
+                    <annotationProcessorPaths>
+                        <path>
+                            <groupId>org.projectlombok</groupId>
+                            <artifactId>lombok</artifactId>
+                            <version>${lombok.version}</version>
+                        </path>
+                    </annotationProcessorPaths>
                 </configuration>
             </plugin>
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-surefire-plugin</artifactId>
-                <version>${maven-surefire-plugin.version}</version>
+                <version>3.2.5</version>
                 <configuration>
                     <includes>
                         <include>**/*Test.java</include>
                     </includes>
                     <argLine>-Xms512m</argLine>
+                    <useModulePath>false</useModulePath>
                 </configuration>
             </plugin>
             <plugin>
