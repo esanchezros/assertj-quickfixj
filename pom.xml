@@ -43,9 +43,6 @@
 		<url>https://github.com/esanchezros/assertj-quickfixj/issues</url>
 	</issueManagement>
 
-	<prerequisites>
-		<maven>3.5.0</maven>
-	</prerequisites>
 	<properties>
 		<java.version>11</java.version>
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
