@@ -4,7 +4,7 @@ Fluent, AssertJ-style assertions for QuickFIX/J Message objects. This library le
 
 - Project home: https://github.com/esanchezros/assertj-quickfixj
 - License: Apache 2.0
-- Java: 8, 11, 17
+- Java: 11, 17, 21
 - QuickFIX/J: 2.3.2 (API compatible with 2.x)
 - AssertJ: 3.x (tested with recent versions)
 
@@ -25,16 +25,20 @@ The artifact is published to Maven Central.
 
 Maven:
 
+```xml
 <dependency>
   <groupId>io.allune</groupId>
   <artifactId>assertj-quickfixj</artifactId>
   <version>1.0.0</version>
   <scope>test</scope>
 </dependency>
+```
 
 Gradle (Kotlin DSL):
 
+```gradle
 testImplementation("io.allune:assertj-quickfixj:1.0.0")
+```
 
 Notes:
 - quickfixj-core and quickfixj-messages-* are expected to be provided by your project/test runtime. This library does not bundle QuickFIX/J classes.
@@ -44,6 +48,7 @@ Notes:
 ## Quick start
 Create a QuickFIX/J Message and assert fields and types in one chain.
 
+```java
 // Given
 test Message message = new Message(
     "8=FIX.4.0\u00019=122\u000135=D\u000134=215\u000149=CLIENT12\u000152=20100225-19:41:57.316\u000138=1000\u000156=B\u00011=Marcel\u000111=13346\u000121=1\u000140=2\u000144=5\u000154=1\u000155=GBP/USD\u000159=0\u000160=20100225-19:39:52.020\u000110=074\u0001");
@@ -69,7 +74,7 @@ Assertions.assertThat(message)
         .hasFieldValue(quickfix.field.Side.FIELD, "1")
         .hasFieldValue(quickfix.field.Symbol.FIELD, "GBP/USD")
         .hasFieldValue(quickfix.field.OrdType.FIELD, "2");
-
+```
 
 ## Core concepts and API
 - Entry point: io.allune.quickfixj.api.Assertions.assertThat(Message)
@@ -91,9 +96,10 @@ Assertions.assertThat(message)
 ## Message type by name
 If you prefer to assert by message name instead of type code, use hasMsgTypeName(..). The lookup uses the session/application data dictionaries for the message’s version.
 
+```java
 Assertions.assertThat(message)
     .hasMsgTypeName("NewOrderSingle");
-
+```
 
 ## FIXT.1.1 and ApplVerID
 For FIXT.1.1 sessions (BeginString FIXT.1.1), the effective application BeginString is derived from ApplVerID using QuickFIX/J’s MessageUtils.toBeginString mapping. This library handles that internally, so field type and message name lookups behave as if you were on FIX.5.0, FIX.5.0SP1, or FIX.5.0SP2.
@@ -104,10 +110,12 @@ If a message lacks the required ApplVerID, assertions that need the effective ve
 ## Custom Data Dictionaries (optional)
 You can register custom data dictionaries when asserting messages, for example if you have user-defined fields or variants.
 
+```java
 DataDictionary dd = new DataDictionary("path/to/FIX40.xml");
 Assertions.assertThat(message)
     .usingDataDictionary("FIX.4.0", dd)
     .hasFieldValue(6000, "CustomValue");
+```
 
 Notes:
 - The registration applies process-wide during the test run; prefer to register in a setup method and restore state between tests if needed.
@@ -138,7 +146,7 @@ Notes:
 
 
 ## Compatibility
-- Java: 8, 11, 17
+- Java: 11, 17, 21
 - QuickFIX/J: tested with 2.3.2; should work with other 2.x
 - AssertJ: 3.x (the project’s pom uses a version range; pin a modern 3.x if you manage via BOM)
 
@@ -146,11 +154,11 @@ If you work with older dictionaries or custom ones, ensure they are compatible w
 
 
 ## Build and test locally
-- Requirements: JDK 8+ and Maven 3.8+
+- Requirements: JDK 11+ and Maven 3.8+
 - Run tests:
   mvn -DskipTests=false test
 
-The repository includes GitHub Actions workflows that run the test suite on Java 8, 11, and 17 for PRs and pushes to main.
+The repository includes GitHub Actions workflows that run the test suite on Java 11, 17 and 21 for PRs and pushes to main.
 
 
 ## FAQ
