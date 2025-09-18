@@ -124,26 +124,31 @@ Notes:
 
 ## Failure messages (examples)
 - Missing field:
+```shell
   Expecting Message:
    <...>
   to have field with tag <8>
   but did not.
+```
 
 - Wrong message type:
+```shell
   Expecting Message:
    <...>
   to be of type <D>
   but was:
    <8>
+```
 
 - Wrong field value:
+```shell
   Expecting field with tag <1> in Message:
    <...>
   to have value:
    <Marcel>
   but was:
    <John>
-
+```
 
 ## Compatibility
 - Java: 11, 17, 21
