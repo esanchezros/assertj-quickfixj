@@ -1,0 +1,52 @@
+= Release Process
+
+== Ownership
+
+Only a maintainer publishes artifacts, creates tags, or marks a GitHub release final. Pull requests and automated agents must not publish or tag without explicit maintainer approval.
+
+== Preparation
+
+. Confirm the target milestone and that issues are closed or explicitly deferred.
+. Review public API changes, dependency changes, compatibility, and migration notes.
+. Set the intended release version and update the changelog and examples.
+. Update both the root POM and `consumer-pom.xml` to the intended release version.
+. Run the full Java and QuickFIX/J matrix from a clean checkout.
+. Run the packaged-consumer fixture.
+. Confirm dependency convergence, JaCoCo coverage, and japicmp results.
+. Build source and Javadoc artifacts with GPG disabled for inspection.
+. Confirm Maven coordinates, POM metadata, licenses, and signing configuration.
+
+The canonical verification command is:
+
+[source,shell]
+----
+mvn --batch-mode verify
+----
+
+The release candidate artifact inspection command is:
+
+[source,shell]
+----
+mvn --batch-mode -Prelease -Dgpg.skip=true clean verify
+----
+
+== Required evidence
+
+Record Java 11, 17, and 21 results with QuickFIX/J 2.3.2 and 3.0.2; unit-test and coverage results; packaged-consumer results; binary and source compatibility results against 1.0.0; dependency convergence; generated source and Javadoc archives; and interoperability results from FixMock when available.
+
+== Maven Central
+
+The Central plugin is configured with automatic publication disabled. After explicit approval, the maintainer signs and deploys the release bundle. The maintainer inspects the validated deployment in the Central Portal and separately approves publication. Credentials and signing keys stay outside the repository.
+
+== After publication
+
+. Resolve the released POM, JAR, source JAR, and Javadoc JAR from Maven Central using a fresh local repository.
+. Create the signed or annotated Git tag.
+. Publish the GitHub release and release notes.
+. Update README examples if they still use a development version.
+. Advance to the next development version.
+. Confirm FixMock and starter compatibility workflows against the released version.
+
+== Failed releases
+
+Published Maven artifacts are immutable. Stop on any validation failure. Do not replace a published version; prepare and verify a corrected patch release.

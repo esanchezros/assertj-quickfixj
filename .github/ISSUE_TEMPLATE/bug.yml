@@ -1,0 +1,58 @@
+name: Bug report
+description: Report reproducible incorrect assertion behavior in a supported release.
+title: "[Bug]: "
+labels: [bug]
+body:
+  - type: markdown
+    attributes:
+      value: "Do not include credentials, FIX session secrets, or proprietary messages."
+  - type: input
+    id: library_version
+    attributes:
+      label: AssertJ QuickFIX/J version
+      placeholder: 1.0.0
+    validations:
+      required: true
+  - type: input
+    id: environment
+    attributes:
+      label: Environment
+      description: Include Java, QuickFIX/J, AssertJ Core, operating system, and build-tool versions.
+      placeholder: Java 17, QuickFIX/J 3.0.2, AssertJ Core 3.27.7, Linux, Maven 3.9
+    validations:
+      required: true
+  - type: textarea
+    id: problem
+    attributes:
+      label: Observed assertion behavior and diagnostics
+    validations:
+      required: true
+  - type: textarea
+    id: reproduction
+    attributes:
+      label: Minimal reproduction
+      description: Provide a minimal message and assertion chain, replacing sensitive values.
+    validations:
+      required: true
+  - type: textarea
+    id: expected
+    attributes:
+      label: Expected behavior
+    validations:
+      required: true
+  - type: dropdown
+    id: regression
+    attributes:
+      label: Is this a regression?
+      options: [Unknown, "No", "Yes"]
+    validations:
+      required: true
+  - type: checkboxes
+    id: checks
+    attributes:
+      label: Checks
+      options:
+        - label: I searched existing issues and pull requests.
+          required: true
+        - label: I removed credentials and sensitive FIX information.
+          required: true

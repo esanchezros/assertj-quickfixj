@@ -60,7 +60,6 @@ import static quickfix.field.MsgType.MARKET_DATA_REQUEST;
 import static quickfix.field.MsgType.MARKET_DATA_REQUEST_REJECT;
 import static quickfix.field.MsgType.MARKET_DATA_SNAPSHOT_FULL_REFRESH;
 import static quickfix.field.MsgType.MASS_QUOTE;
-import static quickfix.field.MsgType.MASS_QUOTE_ACKNOWLEDGEMENT;
 import static quickfix.field.MsgType.MULTILEG_ORDER_CANCEL_REPLACE;
 import static quickfix.field.MsgType.NEWS;
 import static quickfix.field.MsgType.NEW_ORDER_CROSS;
@@ -68,10 +67,8 @@ import static quickfix.field.MsgType.NEW_ORDER_MULTILEG;
 import static quickfix.field.MsgType.ORDER_CANCEL_REJECT;
 import static quickfix.field.MsgType.ORDER_CANCEL_REPLACE_REQUEST;
 import static quickfix.field.MsgType.ORDER_CANCEL_REQUEST;
-import static quickfix.field.MsgType.ORDER_LIST;
 import static quickfix.field.MsgType.ORDER_MASS_CANCEL_REPORT;
 import static quickfix.field.MsgType.ORDER_MASS_CANCEL_REQUEST;
-import static quickfix.field.MsgType.ORDER_SINGLE;
 import static quickfix.field.MsgType.ORDER_STATUS_REQUEST;
 import static quickfix.field.MsgType.QUOTE;
 import static quickfix.field.MsgType.QUOTE_CANCEL;
@@ -95,7 +92,6 @@ import static quickfix.field.MsgType.TEST_REQUEST;
 import static quickfix.field.MsgType.TRADE_CAPTURE_REPORT_REQUEST;
 import static quickfix.field.MsgType.TRADING_SESSION_STATUS;
 import static quickfix.field.MsgType.TRADING_SESSION_STATUS_REQUEST;
-import static quickfix.field.MsgType.XML_MESSAGE;
 
 /**
  * Assertions for QuickFix/J {@link Message}.
@@ -104,6 +100,12 @@ import static quickfix.field.MsgType.XML_MESSAGE;
  * @author Simon Lewis
  */
 public class MessageAssert extends AbstractFieldMapAssert<MessageAssert, Message> {
+	// These FIX protocol values are stable across QuickFIX/J 2.3.x and 3.0.x.
+	private static final String MASS_QUOTE_ACKNOWLEDGEMENT = "b";
+	private static final String ORDER_LIST = "E";
+	private static final String ORDER_SINGLE = "D";
+	private static final String XML_MESSAGE = "n";
+
 
 	private String beginString;
 

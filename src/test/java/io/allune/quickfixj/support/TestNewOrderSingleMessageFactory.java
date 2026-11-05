@@ -18,7 +18,6 @@ import quickfix.field.Side;
 
 import java.time.LocalDateTime;
 
-import static quickfix.field.HandlInst.AUTOMATED_EXECUTION_ORDER_PRIVATE_NO_BROKER_INTERVENTION;
 
 /**
  * @author Eduardo Sanchez-Ros
@@ -34,7 +33,7 @@ public class TestNewOrderSingleMessageFactory {
 		return NewOrderSingle.builder()
 				.beginString(beginString)
 				.clientOrderId("13346")
-				.handlInst(AUTOMATED_EXECUTION_ORDER_PRIVATE_NO_BROKER_INTERVENTION)
+				.handlInst('1')
 				.symbol("GBP/USD")
 				.side(Side.BUY)
 				.orderQty(1000D)

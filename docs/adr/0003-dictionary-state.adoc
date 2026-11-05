@@ -1,0 +1,19 @@
+= ADR 0003: Dictionary override state in 1.x
+
+Status: Accepted
+
+== Context
+
+`MessageAssert.usingDataDictionary` stores custom dictionaries in a process-wide concurrent registry. Concurrent access is safe, but overrides persist and tests using different dictionaries for the same FIX version can affect one another. Changing this behavior requires public API and chaining design work.
+
+== Decision
+
+Keep the existing behavior for 1.x compatibility. Document the process-wide scope. Tests that register a custom dictionary must avoid conflicting parallel registration. Design assertion-scoped dictionary configuration for 2.0.
+
+== Consequences
+
+Normal assertions using bundled QuickFIX/J dictionaries remain parallel-safe. Conflicting custom overrides require isolation. This limitation stays visible in the README and roadmap.
+
+== Alternatives
+
+A breaking 1.1 change was rejected because it would make the compatibility release larger and could invalidate existing chains. Leaving the behavior undocumented was rejected because it hides a test-order risk.

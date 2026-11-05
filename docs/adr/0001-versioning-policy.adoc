@@ -1,0 +1,21 @@
+= ADR 0001: Versioning and compatibility policy
+
+Status: Accepted
+
+== Context
+
+AssertJ QuickFIX/J is consumed from test code, but binary API changes, minimum Java changes, assertion semantics, failure diagnostics, and dependency upgrades can still break consumers.
+
+== Decision
+
+Use semantic versioning intent. Patch releases contain compatible fixes. Minor releases can add compatible assertions and support new dependency lines. Major releases can remove deprecated APIs or change state and package boundaries.
+
+Every release after 1.0.0 checks public binary and source compatibility against the previous release. Release notes identify changes to Java, QuickFIX/J, AssertJ Core, Maven, assertion semantics, and notable diagnostics.
+
+== Consequences
+
+A dependency upgrade can require a minor or major release even when method signatures do not change. Accidental incompatible changes fail verification. Documented exceptions require maintainer review and migration notes.
+
+== Alternatives
+
+Date-based versions and unqualified best-effort compatibility were rejected because they do not give downstream projects a useful upgrade signal.

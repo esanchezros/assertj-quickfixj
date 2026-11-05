@@ -21,7 +21,6 @@ import quickfix.field.Side;
 
 import static io.allune.quickfixj.api.Assertions.assertThat;
 import static quickfix.FixVersions.BEGINSTRING_FIX40;
-import static quickfix.field.HandlInst.AUTOMATED_EXECUTION_ORDER_PRIVATE_NO_BROKER_INTERVENTION;
 
 public class MessageTrailerAssert_hasSignatureLength_Test {
 
@@ -33,7 +32,7 @@ public class MessageTrailerAssert_hasSignatureLength_Test {
 				.sender("BANZAI")
 				.target("EXEC")
 				.clientOrderId("13346")
-				.handlInst(AUTOMATED_EXECUTION_ORDER_PRIVATE_NO_BROKER_INTERVENTION)
+				.handlInst('1')
 				.symbol("GBP/USD")
 				.side(Side.BUY)
 				.orderQty(1000D)

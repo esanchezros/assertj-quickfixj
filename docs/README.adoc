@@ -1,0 +1,12 @@
+= AssertJ QuickFIX/J Documentation
+
+Start with link:../README.md[the README] for installation and common assertions.
+
+* link:compatibility.adoc[Compatibility] - supported Java, QuickFIX/J, and AssertJ versions and the dependency model.
+* link:support-policy.adoc[Support policy] - maintained lines and compatibility commitments.
+* link:release-process.adoc[Release process] - verification evidence and approval gates.
+* link:release-checklist.md[Release checklist] - explicit release gates and maintainer approvals.
+* link:adr/README.adoc[Architecture decisions] - durable compatibility and state-management decisions.
+* link:../ROADMAP.adoc[Roadmap] - planned milestones and ecosystem sequencing.
+* link:../CONTRIBUTING.adoc[Contributing] - issue, branch, pull request, and test conventions.
+* link:../SECURITY.md[Security] - private vulnerability reporting.

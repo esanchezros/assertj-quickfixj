@@ -1,0 +1,62 @@
+name: Feature request
+description: Propose a compatible assertion improvement or new capability.
+title: "[Feature]: "
+labels: [enhancement]
+body:
+  - type: textarea
+    id: problem
+    attributes:
+      label: Problem or use case
+      description: Explain the testing problem before describing a solution.
+    validations:
+      required: true
+  - type: textarea
+    id: outcome
+    attributes:
+      label: Intended outcome
+    validations:
+      required: true
+  - type: textarea
+    id: proposal
+    attributes:
+      label: Proposed fluent API or approach
+  - type: dropdown
+    id: area
+    attributes:
+      label: Area
+      options:
+        - Message type and version assertions
+        - Fields and diagnostics
+        - Groups and components
+        - Data dictionaries
+        - Compatibility
+        - Build and release
+        - Documentation
+        - Ecosystem integration
+        - Other
+    validations:
+      required: true
+  - type: dropdown
+    id: compatibility
+    attributes:
+      label: Expected compatibility impact
+      options:
+        - No public contract change
+        - Backward-compatible addition
+        - Deprecation
+        - Behavior change
+        - Breaking change
+        - Unknown
+    validations:
+      required: true
+  - type: textarea
+    id: acceptance
+    attributes:
+      label: Suggested acceptance criteria
+  - type: checkboxes
+    id: checks
+    attributes:
+      label: Checks
+      options:
+        - label: I searched existing issues, pull requests, and the roadmap.
+          required: true

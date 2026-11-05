@@ -1,0 +1,22 @@
+= Architecture Decision Records
+
+Architecture decision records document durable choices that affect compatibility, public API, dependencies, or release behavior.
+
+[cols="1,2,1"]
+|===
+|ADR |Decision |Status
+
+|link:0001-versioning-policy.adoc[0001]
+|Use semantic versioning intent and verify compatibility against the previous release
+|Accepted
+
+|link:0002-quickfixj-dependency-model.adoc[0002]
+|Ship one artifact and let consumers select QuickFIX/J
+|Accepted
+
+|link:0003-dictionary-state.adoc[0003]
+|Treat process-wide custom dictionary overrides as a documented 1.x limitation
+|Accepted
+|===
+
+New records should state context, decision, consequences, and alternatives. Supersede a record instead of silently rewriting an accepted decision.

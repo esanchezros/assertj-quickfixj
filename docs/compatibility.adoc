@@ -1,0 +1,42 @@
+= Compatibility
+
+AssertJ QuickFIX/J is a test library. Its QuickFIX/J dependencies use Maven `provided` scope, so the consuming application selects the QuickFIX/J version.
+
+== Supported matrix
+
+[cols="1,1,2,2,2"]
+|===
+|Library line |Minimum Java |QuickFIX/J |AssertJ Core |Status
+
+|`1.1.x`
+|11
+|2.3.2 and 3.0.2
+|3.27.7
+|Active; both QuickFIX/J versions are release gates
+
+|`1.0.x`
+|11
+|Built with 2.3.2
+|3.x version range
+|Maintenance; 3.0.x was not a source-build release gate
+|===
+
+Continuous integration runs Java 11, 17, and 21 for each supported QuickFIX/J version. Later patch releases in the 2.3.x and 3.0.x lines may work, but they are not support claims until added to the release matrix.
+
+== Dependency model
+
+Consumers add `assertj-quickfixj` in test scope and provide `quickfixj-core` plus the message artifact used by their tests. The library does not bundle QuickFIX/J and does not override an application engine version.
+
+[source,xml]
+----
+<dependency>
+  <groupId>io.allune</groupId>
+  <artifactId>assertj-quickfixj</artifactId>
+  <version>1.1.0</version>
+  <scope>test</scope>
+</dependency>
+----
+
+== Versioning
+
+A QuickFIX/J or AssertJ upgrade can be incompatible even when the library's Java API is unchanged. Release notes identify Java, QuickFIX/J, AssertJ, Maven, and transitive dependency baseline changes. Binary and source compatibility are checked against the previous public release.
