@@ -1,0 +1,39 @@
+= Contributing
+
+Thank you for helping maintain AssertJ QuickFIX/J.
+
+== Before starting
+
+* Search existing GitHub Issues and pull requests.
+* Open an issue before a substantial, compatibility-sensitive, or potentially breaking change.
+* Read link:ROADMAP.adoc[the roadmap], link:docs/support-policy.adoc[the support policy], and relevant link:docs/adr/README.adoc[architecture decisions].
+* Report suspected vulnerabilities through link:SECURITY.md[the security policy], not a public issue.
+
+== Public and local planning
+
+GitHub Issues are the public source of truth for requirements, acceptance criteria, and delivery status. Maintainers can use ignored `tasks/projects/<project-name>/` directories for investigation notes and implementation plans. Copy durable requirements and decisions into a GitHub Issue, tracked documentation, or an architecture decision record before considering work complete.
+
+== Development setup
+
+The active line requires Java 11 or later and Maven 3.8.6 or later. Run the canonical verification lifecycle before submitting a pull request:
+
+[source,shell]
+----
+mvn --batch-mode verify
+----
+
+To exercise the other supported QuickFIX/J line locally, set `quickfixj.version` to `3.0.2` or `2.3.2`. Continuous integration runs both.
+
+== Branches and pull requests
+
+Use a focused branch such as `fix/<issue>-<description>`, `feat/<issue>-<description>`, `test/<issue>-<description>`, `docs/<issue>-<description>`, or `chore/<issue>-<description>`. Include the problem, compatibility impact, tests, documentation, release-note impact, and rollback considerations in the pull request.
+
+Do not reference private planning labels or local `tasks/` files in production code or comments.
+
+== Tests
+
+Use unit tests for assertion behavior and failure diagnostics. Add packaged-consumer tests for dependency or public-contract changes. Test both QuickFIX/J 2.3.2 and 3.0.2 when code touches QuickFIX/J APIs. Keep tests deterministic and restore any process-wide dictionary overrides.
+
+== Releases
+
+Only a maintainer publishes Maven artifacts, creates tags, or publishes a GitHub release. See link:docs/release-process.adoc[the release process].

@@ -23,7 +23,6 @@ import quickfix.fix41.NewOrderSingle;
 import static io.allune.quickfixj.api.Assertions.assertThat;
 import static io.allune.quickfixj.support.TestNewOrderSingleMessageFactory.newOrderSingleBuilder;
 import static quickfix.FixVersions.BEGINSTRING_FIX41;
-import static quickfix.field.HandlInst.AUTOMATED_EXECUTION_ORDER_PRIVATE_NO_BROKER_INTERVENTION;
 
 /**
  * @author Eduardo Sanchez-Ros
@@ -36,7 +35,7 @@ public class NewOrderSingle41AssertTest {
 	public void setUp() throws Exception {
 		message = newOrderSingleBuilder(BEGINSTRING_FIX41)
 				.clientOrderId("13346")
-				.handlInst(AUTOMATED_EXECUTION_ORDER_PRIVATE_NO_BROKER_INTERVENTION)
+				.handlInst('1')
 				.symbol("GBP/USD")
 				.side(Side.BUY)
 				.orderQty(1000D)

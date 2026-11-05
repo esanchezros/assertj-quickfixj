@@ -29,7 +29,6 @@ import java.time.LocalDateTime;
 import static io.allune.quickfixj.api.Assertions.assertThat;
 import static io.allune.quickfixj.support.TestNewOrderSingleMessageFactory.newOrderSingleBuilder;
 import static quickfix.FixVersions.FIX50SP2;
-import static quickfix.field.HandlInst.AUTOMATED_EXECUTION_ORDER_PRIVATE_NO_BROKER_INTERVENTION;
 
 /**
  * @author Eduardo Sanchez-Ros
@@ -42,7 +41,7 @@ public class NewOrderSingle50sp1AssertTest {
 	public void setUp() {
 		messageBuilder = newOrderSingleBuilder(FIX50SP2)
 				.clientOrderId("13346")
-				.handlInst(AUTOMATED_EXECUTION_ORDER_PRIVATE_NO_BROKER_INTERVENTION)
+				.handlInst('1')
 				.symbol("GBP/USD")
 				.side(Side.BUY)
 				.orderQty(1000D)
@@ -71,7 +70,7 @@ public class NewOrderSingle50sp1AssertTest {
 		// When/Then
 		assertThat(message)
 				.isNewOrderSingle()
-				.hasFieldValue(HandlInst.FIELD, HandlInst.AUTOMATED_EXECUTION_ORDER_PRIVATE_NO_BROKER_INTERVENTION);
+				.hasFieldValue(HandlInst.FIELD, '1');
 	}
 
 	@Test
@@ -153,7 +152,7 @@ public class NewOrderSingle50sp1AssertTest {
 		assertThat(message)
 				.isNewOrderSingle()
 				.hasFieldValue(ClOrdID.FIELD, "13346")
-				.hasFieldValue(HandlInst.FIELD, HandlInst.AUTOMATED_EXECUTION_ORDER_PRIVATE_NO_BROKER_INTERVENTION)
+				.hasFieldValue(HandlInst.FIELD, '1')
 				.hasFieldValue(Symbol.FIELD, "GBP/USD")
 				.hasFieldValue(Side.FIELD, Side.BUY)
 				.hasFieldValue(OrderQty.FIELD, 1000D)

@@ -60,4 +60,19 @@ public class MessageAssert_MessageTypes_Matrix_Test {
                 .isInstanceOf(AssertionError.class)
                 .hasMessageContaining("to be an Application message but was not");
     }
+    @Test
+    public void legacyQuickFixJAliasesShouldUseStableProtocolCodes() {
+        assertMessageType("D").isNewOrderSingle();
+        assertMessageType("E").isNewOrderList();
+        assertMessageType("b").isMassQuoteAcknowledgement();
+        assertMessageType("n").isXmlMessage();
+    }
+
+    private MessageAssert assertMessageType(String messageType) {
+        Message message = new Message();
+        message.getHeader().setString(8, "FIX.4.4");
+        message.getHeader().setString(35, messageType);
+        return assertThat(message);
+    }
+
 }

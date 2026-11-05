@@ -1,0 +1,44 @@
+name: Compatibility regression
+description: Report a problem caused by a Java, QuickFIX/J, AssertJ Core, or library upgrade.
+title: "[Compatibility]: "
+labels: [bug]
+body:
+  - type: input
+    id: working_combination
+    attributes:
+      label: Last working combination
+      description: Include library, QuickFIX/J, AssertJ Core, and Java versions.
+    validations:
+      required: true
+  - type: input
+    id: failing_combination
+    attributes:
+      label: Failing combination
+      description: Include library, QuickFIX/J, AssertJ Core, and Java versions.
+    validations:
+      required: true
+  - type: textarea
+    id: behavior_change
+    attributes:
+      label: Observed compatibility change
+      description: Describe the compile-time, runtime, assertion, diagnostic, or dependency failure.
+    validations:
+      required: true
+  - type: textarea
+    id: reproduction
+    attributes:
+      label: Minimal reproduction
+    validations:
+      required: true
+  - type: textarea
+    id: dependency_tree
+    attributes:
+      label: Relevant dependency tree
+      render: text
+  - type: checkboxes
+    id: checks
+    attributes:
+      label: Checks
+      options:
+        - label: I searched existing issues and release notes.
+          required: true

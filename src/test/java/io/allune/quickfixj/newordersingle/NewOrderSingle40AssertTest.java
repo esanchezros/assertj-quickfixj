@@ -31,7 +31,6 @@ import static io.allune.quickfixj.api.Assertions.assertThat;
 import static io.allune.quickfixj.support.TestNewOrderSingleMessageFactory.newOrderSingleBuilder;
 import static org.assertj.core.api.Assertions.fail;
 import static quickfix.FixVersions.BEGINSTRING_FIX40;
-import static quickfix.field.HandlInst.AUTOMATED_EXECUTION_ORDER_PRIVATE_NO_BROKER_INTERVENTION;
 
 /**
  * @author Eduardo Sanchez-Ros
@@ -45,7 +44,7 @@ public class NewOrderSingle40AssertTest {
 	public void setUp() {
 		message = newOrderSingleBuilder(BEGINSTRING_FIX40)
 				.clientOrderId("13346")
-				.handlInst(AUTOMATED_EXECUTION_ORDER_PRIVATE_NO_BROKER_INTERVENTION)
+				.handlInst('1')
 				.symbol("GBP/USD")
 				.side(Side.BUY)
 				.orderQty(1000D)
@@ -64,7 +63,7 @@ public class NewOrderSingle40AssertTest {
 		// When/Then
 		assertThat(message)
 				.hasFieldValue(ClOrdID.FIELD, "13346")
-				.hasFieldValue(HandlInst.FIELD, String.valueOf(HandlInst.AUTOMATED_EXECUTION_ORDER_PRIVATE_NO_BROKER_INTERVENTION))
+				.hasFieldValue(HandlInst.FIELD, String.valueOf('1'))
 				.hasFieldValue(Symbol.FIELD, "GBP/USD")
 				.hasFieldValue(Side.FIELD, String.valueOf(Side.BUY))
 				.hasFieldValue(OrderQty.FIELD, 1000)

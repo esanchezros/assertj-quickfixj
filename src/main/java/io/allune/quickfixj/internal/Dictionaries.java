@@ -14,6 +14,8 @@ package io.allune.quickfixj.internal;
 
 import quickfix.DataDictionary;
 import quickfix.DefaultDataDictionaryProvider;
+import quickfix.FixVersions;
+import quickfix.field.ApplVerID;
 
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
@@ -41,17 +43,19 @@ public class Dictionaries {
 
 	public DataDictionary getSessionDataDictionary(String beginString) {
 		DataDictionary dd = sessionOverrides.get(beginString);
-		if (dd != null) return dd;
+		if (dd != null) {
+			return dd;
+		}
 		// For FIXT.1.1 application flows, the beginString may be mapped to FIX.5.0* by MessageUtils.toBeginString(ApplVerID)
 		// In those cases, DefaultDataDictionaryProvider expects the application dictionary, not a session one.
-		if ("FIX.5.0SP2".equals(beginString)) {
-			return getApplicationDataDictionary("9"); // ApplVerID.FIX50SP2
+		if (FixVersions.FIX50SP2.equals(beginString)) {
+			return getApplicationDataDictionary(ApplVerID.FIX50SP2); // ApplVerID.FIX50SP2
 		}
-		if ("FIX.5.0SP1".equals(beginString)) {
-			return getApplicationDataDictionary("8"); // ApplVerID.FIX50SP1
+		if (FixVersions.FIX50SP1.equals(beginString)) {
+			return getApplicationDataDictionary(ApplVerID.FIX50SP1); // ApplVerID.FIX50SP1
 		}
-		if ("FIX.5.0".equals(beginString)) {
-			return getApplicationDataDictionary("7"); // ApplVerID.FIX50
+		if (FixVersions.FIX50.equals(beginString)) {
+			return getApplicationDataDictionary(ApplVerID.FIX50); // ApplVerID.FIX50
 		}
 		return dataDictionaryProvider.getSessionDataDictionary(beginString);
 	}
@@ -62,7 +66,7 @@ public class Dictionaries {
 
 	public DataDictionary getApplicationDataDictionary(String applVerId) {
 		DataDictionary dd = applicationOverrides.get(applVerId);
-		return dd != null ? dd : dataDictionaryProvider.getApplicationDataDictionary(new quickfix.field.ApplVerID(applVerId));
+		return dd != null ? dd : dataDictionaryProvider.getApplicationDataDictionary(new ApplVerID(applVerId));
 	}
 
 	public void addApplicationDataDictionary(String applVerId, DataDictionary dataDictionary) {

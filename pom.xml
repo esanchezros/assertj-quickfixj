@@ -5,7 +5,7 @@
 
 	<groupId>io.allune</groupId>
 	<artifactId>assertj-quickfixj</artifactId>
-	<version>1.0.0-SNAPSHOT</version>
+	<version>1.1.0-SNAPSHOT</version>
 	<packaging>jar</packaging>
 	<name>AssertJ fluent assertions for QuickFix/J</name>
 	<description>AssertJ fluent assertions for QuickFix/J</description>
@@ -48,19 +48,22 @@
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 		<project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
 
+		<central-publishing-maven-plugin.version>0.12.0</central-publishing-maven-plugin.version>
+		<assertj-core.version>3.27.7</assertj-core.version>
 		<quickfixj.version>2.3.2</quickfixj.version>
 		<lombok.version>1.18.34</lombok.version>
-		<junit.version>4.13.1</junit.version>
+		<junit.version>4.13.2</junit.version>
 		<junit.jupiter.version>5.11.3</junit.jupiter.version>
-		<mockito-core.version>2.18.3</mockito-core.version>
 
-		<cobertura-maven-plugin.version>2.7</cobertura-maven-plugin.version>
 		<maven-javadoc-plugin.version>3.0.0</maven-javadoc-plugin.version>
-		<versions-maven-plugin.version>2.5</versions-maven-plugin.version>
 		<maven-compiler-plugin.version>3.14.0</maven-compiler-plugin.version>
 		<maven-surefire-plugin.version>3.5.3</maven-surefire-plugin.version>
+		<maven-enforcer-plugin.version>3.6.2</maven-enforcer-plugin.version>
+		<jacoco-maven-plugin.version>0.8.14</jacoco-maven-plugin.version>
+		<jacoco.minimum.line.coverage>0.45</jacoco.minimum.line.coverage>
+		<japicmp-maven-plugin.version>0.26.5</japicmp-maven-plugin.version>
+		<previous.release.version>1.0.0</previous.release.version>
 		<maven-release-plugin.version>3.1.1</maven-release-plugin.version>
-		<nexus-staging-maven-plugin.version>1.6.8</nexus-staging-maven-plugin.version>
 		<maven-source-plugin.version>3.0.1</maven-source-plugin.version>
 		<license-maven-plugin.version>5.0.0</license-maven-plugin.version>
 	</properties>
@@ -69,7 +72,7 @@
 		<dependency>
 			<groupId>org.assertj</groupId>
 			<artifactId>assertj-core</artifactId>
-			<version>[3.5.0, 3.99.0]</version>
+			<version>${assertj-core.version}</version>
 		</dependency>
 		<dependency>
 			<groupId>org.quickfixj</groupId>
@@ -87,7 +90,7 @@
 			<groupId>org.projectlombok</groupId>
 			<artifactId>lombok</artifactId>
 			<version>${lombok.version}</version>
-			<scope>provided</scope>
+			<scope>test</scope>
 		</dependency>
 		<!-- test dependencies -->
 		<dependency>
@@ -114,16 +117,28 @@
 			<version>${junit.version}</version>
 			<scope>test</scope>
 		</dependency>
-		<dependency>
-			<groupId>org.mockito</groupId>
-			<artifactId>mockito-core</artifactId>
-			<version>${mockito-core.version}</version>
-			<scope>test</scope>
-		</dependency>
 	</dependencies>
 
 	<build>
 		<plugins>
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-enforcer-plugin</artifactId>
+				<version>${maven-enforcer-plugin.version}</version>
+				<executions>
+					<execution>
+						<id>enforce-build-contract</id>
+						<goals><goal>enforce</goal></goals>
+						<configuration>
+							<rules>
+								<requireMavenVersion><version>[3.8.6,)</version></requireMavenVersion>
+								<requireJavaVersion><version>[11,)</version></requireJavaVersion>
+								<dependencyConvergence/>
+							</rules>
+						</configuration>
+					</execution>
+				</executions>
+			</plugin>
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-compiler-plugin</artifactId>
@@ -151,25 +166,25 @@
 					<includes>
 						<include>**/*Test.java</include>
 					</includes>
-					<argLine>-Xms512m</argLine>
+					<argLine>@{argLine} -Xms512m</argLine>
 					<useModulePath>false</useModulePath>
 				</configuration>
 			</plugin>
 			<plugin>
 				<groupId>org.sonatype.central</groupId>
 				<artifactId>central-publishing-maven-plugin</artifactId>
-				<version>0.7.0</version>
+				<version>${central-publishing-maven-plugin.version}</version>
 				<extensions>true</extensions>
 				<configuration>
 					<publishingServerId>central</publishingServerId>
-					<autoPublish>true</autoPublish>
-					<waitUntil>published</waitUntil>
+					<autoPublish>false</autoPublish>
+					<waitUntil>validated</waitUntil>
 				</configuration>
 			</plugin>
 			<plugin>
 				<groupId>org.jacoco</groupId>
 				<artifactId>jacoco-maven-plugin</artifactId>
-				<version>0.8.13</version>
+				<version>${jacoco-maven-plugin.version}</version>
 				<executions>
 					<execution>
 						<id>prepare-agent</id>
@@ -179,6 +194,7 @@
 					</execution>
 					<execution>
 						<id>report</id>
+						<phase>verify</phase>
 						<goals>
 							<goal>report</goal>
 						</goals>
@@ -186,6 +202,55 @@
 							<formats>
 								<format>XML</format>
 							</formats>
+						</configuration>
+					</execution>
+					<execution>
+						<id>check</id>
+						<phase>verify</phase>
+						<goals><goal>check</goal></goals>
+						<configuration>
+							<rules>
+								<rule>
+									<element>BUNDLE</element>
+									<limits>
+										<limit>
+											<counter>LINE</counter>
+											<value>COVEREDRATIO</value>
+											<minimum>${jacoco.minimum.line.coverage}</minimum>
+										</limit>
+									</limits>
+								</rule>
+							</rules>
+						</configuration>
+					</execution>
+				</executions>
+			</plugin>
+			<plugin>
+				<groupId>com.github.siom79.japicmp</groupId>
+				<artifactId>japicmp-maven-plugin</artifactId>
+				<version>${japicmp-maven-plugin.version}</version>
+				<executions>
+					<execution>
+						<id>check-public-api</id>
+						<phase>verify</phase>
+						<goals><goal>cmp</goal></goals>
+						<configuration>
+							<oldVersion>
+								<dependency>
+									<groupId>${project.groupId}</groupId>
+									<artifactId>${project.artifactId}</artifactId>
+									<version>${previous.release.version}</version>
+									<type>jar</type>
+								</dependency>
+							</oldVersion>
+							<newVersion><file><path>${project.build.directory}/${project.build.finalName}.jar</path></file></newVersion>
+							<parameter>
+								<accessModifier>public</accessModifier>
+								<onlyModified>true</onlyModified>
+								<breakBuildOnBinaryIncompatibleModifications>true</breakBuildOnBinaryIncompatibleModifications>
+								<breakBuildOnSourceIncompatibleModifications>true</breakBuildOnSourceIncompatibleModifications>
+							</parameter>
+							<skipHtmlReport>true</skipHtmlReport>
 						</configuration>
 					</execution>
 				</executions>

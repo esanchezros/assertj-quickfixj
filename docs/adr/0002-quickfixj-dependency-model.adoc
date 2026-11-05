@@ -1,0 +1,19 @@
+= ADR 0002: QuickFIX/J dependency model
+
+Status: Accepted
+
+== Context
+
+FixMock and downstream applications must use the QuickFIX/J engine version selected by the application. Publishing separate assertion artifacts for each QuickFIX/J patch would fragment the API and release process.
+
+== Decision
+
+Publish one `io.allune:assertj-quickfixj` artifact. Declare QuickFIX/J core and message dependencies with Maven `provided` scope. Compile and test the same source against QuickFIX/J 2.3.2 and 3.0.2. Use stable FIX protocol codes when QuickFIX/J constant aliases differ between supported lines.
+
+== Consequences
+
+Consumers must provide QuickFIX/J. The library does not silently upgrade an engine. Continuous integration must catch both source and runtime incompatibilities for every claimed line.
+
+== Alternatives
+
+Bundling QuickFIX/J, selecting it transitively, and publishing version-specific assertion artifacts were rejected because each can surprise consumers or multiply maintenance work.

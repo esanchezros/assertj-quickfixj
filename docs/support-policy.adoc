@@ -1,0 +1,23 @@
+= Support Policy
+
+== Maintained lines
+
+`1.1.x` is the active line and receives compatible features, bug fixes, compatibility work, and security fixes. `1.0.x` receives high-value compatible fixes and security fixes while 1.1 adoption stabilizes. Older release candidates are unsupported.
+
+== Compatibility contract
+
+Within a maintained 1.x line, the project aims to preserve public fluent assertion methods, Maven coordinates, Java 11 bytecode compatibility, normal QuickFIX/J `Message` interoperability, and the documented dependency model. Failure messages can improve, but changes that could break exact text matching are called out in release notes.
+
+Types in `io.allune.quickfixj.internal` are implementation details even where historical visibility is `public`. A future major release can reduce that visibility after migration review.
+
+== Security
+
+Security reports follow link:../SECURITY.md[the security policy]. A supported-line fix can require a new patch release.
+
+== Deprecation
+
+Public APIs are deprecated before removal where practical. Removal normally waits for a major release and includes a replacement and migration note.
+
+== End of life
+
+A line reaches end of life after a successor has been stable long enough for ecosystem adoption or when its Java or dependency baseline can no longer be maintained safely. The roadmap, compatibility table, and release notes record the decision.
