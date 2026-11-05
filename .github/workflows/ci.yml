@@ -17,7 +17,7 @@ concurrency:
 jobs:
   verify:
     name: Java ${{ matrix.java }} / QuickFIX/J ${{ matrix.quickfixj }}
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     timeout-minutes: 15
     strategy:
       fail-fast: false
@@ -26,10 +26,10 @@ jobs:
         quickfixj: [ 2.3.2, 3.0.2 ]
     steps:
       - name: Checkout
-        uses: actions/checkout@v4
+        uses: actions/checkout@v5
 
       - name: Set up JDK ${{ matrix.java }}
-        uses: actions/setup-java@v4
+        uses: actions/setup-java@v5
         with:
           distribution: temurin
           java-version: ${{ matrix.java }}
