@@ -8,7 +8,8 @@ Nothing in this checklist authorizes publication. The maintainer must explicitly
 - [ ] Root POM, `consumer-pom.xml`, README examples, and changelog use the intended release version.
 - [ ] `mvn --batch-mode verify` passes from a clean checkout with QuickFIX/J 2.3.2.
 - [ ] The same command passes with `-Dquickfixj.version=3.0.2`.
-- [ ] CI passes Java 11, 17, and 21 for both QuickFIX/J versions.
+- [ ] CI passes Java 11, 17, 21, and 25 for both QuickFIX/J versions.
+- [ ] CI passes AssertJ Core 3.24.2 and 3.27.7 for both QuickFIX/J versions.
 - [ ] The packaged consumer passes for both QuickFIX/J versions.
 - [ ] Dependency convergence passes.
 - [ ] JaCoCo line coverage remains at or above 45 percent.

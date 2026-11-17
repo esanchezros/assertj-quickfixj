@@ -15,13 +15,28 @@ package io.allune.quickfixj.api;
 import quickfix.DataDictionary;
 import quickfix.FixVersions;
 import quickfix.Message;
+import quickfix.SessionID;
 import quickfix.field.BodyLength;
+import quickfix.field.EncryptMethod;
+import quickfix.field.ExecType;
+import quickfix.field.HeartBtInt;
+import quickfix.field.NewSeqNo;
+import quickfix.field.OrdStatus;
+import quickfix.field.RefSeqNum;
+import quickfix.field.ResetSeqNumFlag;
+import quickfix.field.SessionRejectReason;
+import quickfix.field.Text;
+
+import io.allune.quickfixj.internal.Dictionaries;
+
+import java.util.Objects;
 
 import static io.allune.quickfixj.error.ShouldBeAdminMessage.shouldBeAdminMessage;
 import static io.allune.quickfixj.error.ShouldBeAppMessage.shouldBeAppMessage;
 import static io.allune.quickfixj.error.ShouldBeEmptyMessage.shouldBeEmptyMessage;
 import static io.allune.quickfixj.error.ShouldBeEqual.shouldBeEqual;
 import static io.allune.quickfixj.error.ShouldHaveHeader.shouldHaveHeader;
+import static io.allune.quickfixj.error.ShouldHaveSessionID.shouldHaveSessionID;
 import static io.allune.quickfixj.error.ShouldHaveTrailer.shouldHaveTrailer;
 import static org.assertj.core.util.Preconditions.checkArgument;
 import static quickfix.FixVersions.BEGINSTRING_FIX40;
@@ -30,6 +45,8 @@ import static quickfix.FixVersions.BEGINSTRING_FIX42;
 import static quickfix.FixVersions.BEGINSTRING_FIX43;
 import static quickfix.FixVersions.BEGINSTRING_FIX44;
 import static quickfix.FixVersions.BEGINSTRING_FIXT11;
+import static quickfix.MessageUtils.getReverseSessionID;
+import static quickfix.MessageUtils.getSessionID;
 import static quickfix.field.ApplVerID.FIX50;
 import static quickfix.field.ApplVerID.FIX50SP1;
 import static quickfix.field.ApplVerID.FIX50SP2;
@@ -115,7 +132,11 @@ public class MessageAssert extends AbstractFieldMapAssert<MessageAssert, Message
 	 * @param message the {@link Message} to verify.
 	 */
 	public MessageAssert(Message message) {
-		super(message, MessageAssert.class);
+		this(message, Dictionaries.scoped());
+	}
+
+	private MessageAssert(Message message, Dictionaries dictionaries) {
+		super(message, MessageAssert.class, dictionaries);
 		// Defer beginString resolution until first needed to avoid asserting during construction
 		this.beginString = null;
 	}
@@ -881,7 +902,7 @@ public class MessageAssert extends AbstractFieldMapAssert<MessageAssert, Message
 	 * @return {@code this} assertion object.
 	 */
 	public MessageAssert hasMsgTypeName(String expectedMsgTypeName) {
-		messages.assertMessageIsOfTypeName(info, actual, getBeginString(), expectedMsgTypeName);
+		messages.assertMessageIsOfTypeName(info, actual, getBeginString(), expectedMsgTypeName, dictionaries);
 		return this;
 	}
 
@@ -898,14 +919,146 @@ public class MessageAssert extends AbstractFieldMapAssert<MessageAssert, Message
 	}
 
 	/**
+	 * Verifies the protocol fields represented by a QuickFIX/J {@link SessionID}. The session qualifier is ignored
+	 * because it is engine configuration and is not encoded in a FIX message.
+	 *
+	 * @param expectedSessionID the expected session identifier
+	 * @return {@code this} assertion object
+	 */
+	public MessageAssert hasSessionID(SessionID expectedSessionID) {
+		checkArgument(expectedSessionID != null, "'expectedSessionID' must not be null");
+		isNotNull();
+
+		SessionID actualSessionID = getSessionID(actual);
+		if (!hasSameProtocolFields(actualSessionID, expectedSessionID)) {
+			throw failures.failure(info, shouldHaveSessionID(actual, actualSessionID, expectedSessionID));
+		}
+		return this;
+	}
+
+	/**
+	 * Verifies the reverse session identifier for the message.
+	 *
+	 * @param expectedSessionID the expected reverse session identifier
+	 * @return {@code this} assertion object
+	 */
+	public MessageAssert hasReverseSessionID(SessionID expectedSessionID) {
+		checkArgument(expectedSessionID != null, "'expectedSessionID' must not be null");
+		isNotNull();
+
+		SessionID actualSessionID = getReverseSessionID(actual);
+		if (!hasSameProtocolFields(actualSessionID, expectedSessionID)) {
+			throw failures.failure(info, shouldHaveSessionID(actual, actualSessionID, expectedSessionID));
+		}
+		return this;
+	}
+
+	/** Verifies tag 36 ({@code NewSeqNo}). */
+	public MessageAssert hasNewSeqNo(int expectedNewSeqNo) {
+		messages.assertFieldHasValue(info, actual, NewSeqNo.class, expectedNewSeqNo);
+		return this;
+	}
+
+	/** Verifies tag 45 ({@code RefSeqNum}). */
+	public MessageAssert hasRefSeqNum(int expectedRefSeqNum) {
+		messages.assertFieldHasValue(info, actual, RefSeqNum.class, expectedRefSeqNum);
+		return this;
+	}
+
+	/** Verifies tag 373 ({@code SessionRejectReason}). */
+	public MessageAssert hasSessionRejectReason(int expectedReason) {
+		messages.assertFieldHasValue(info, actual, SessionRejectReason.class, expectedReason);
+		return this;
+	}
+
+	/** Verifies tag 58 ({@code Text}). */
+	public MessageAssert hasText(String expectedText) {
+		messages.assertFieldHasValue(info, actual, Text.class, expectedText);
+		return this;
+	}
+
+	/** Verifies tag 98 ({@code EncryptMethod}) on a Logon message. */
+	public MessageAssert hasEncryptMethod(int expectedEncryptMethod) {
+		messages.assertFieldHasValue(info, actual, EncryptMethod.class, expectedEncryptMethod);
+		return this;
+	}
+
+	/** Verifies tag 108 ({@code HeartBtInt}) on a Logon message. */
+	public MessageAssert hasHeartBtInt(int expectedHeartBtInt) {
+		messages.assertFieldHasValue(info, actual, HeartBtInt.class, expectedHeartBtInt);
+		return this;
+	}
+
+	/** Verifies tag 141 ({@code ResetSeqNumFlag}) on a Logon message. */
+	public MessageAssert hasResetSeqNumFlag(boolean expectedResetSeqNumFlag) {
+		messages.assertFieldHasValue(info, actual, ResetSeqNumFlag.class, expectedResetSeqNumFlag);
+		return this;
+	}
+
+	/** Verifies tag 150 ({@code ExecType}) on an ExecutionReport message. */
+	public MessageAssert hasExecType(char expectedExecType) {
+		messages.assertFieldHasValue(info, actual, ExecType.class, expectedExecType);
+		return this;
+	}
+
+	/** Verifies tag 39 ({@code OrdStatus}) on an ExecutionReport message. */
+	public MessageAssert hasOrdStatus(char expectedOrdStatus) {
+		messages.assertFieldHasValue(info, actual, OrdStatus.class, expectedOrdStatus);
+		return this;
+	}
+
+	private boolean hasSameProtocolFields(SessionID actualSessionID, SessionID expectedSessionID) {
+		return Objects.equals(actualSessionID.getBeginString(), expectedSessionID.getBeginString())
+				&& Objects.equals(actualSessionID.getSenderCompID(), expectedSessionID.getSenderCompID())
+				&& Objects.equals(actualSessionID.getSenderSubID(), expectedSessionID.getSenderSubID())
+				&& Objects.equals(actualSessionID.getSenderLocationID(), expectedSessionID.getSenderLocationID())
+				&& Objects.equals(actualSessionID.getTargetCompID(), expectedSessionID.getTargetCompID())
+				&& Objects.equals(actualSessionID.getTargetSubID(), expectedSessionID.getTargetSubID())
+				&& Objects.equals(actualSessionID.getTargetLocationID(), expectedSessionID.getTargetLocationID());
+	}
+
+	/**
+	 * Registers a process-global session dictionary. This method retains its historical global side effect for binary
+	 * and behavioral compatibility. New code should use {@link #withDataDictionary(String, DataDictionary)}.
+	 *
 	 * @param beginString
 	 * @param dataDictionary
 	 * @return {@code this} assertion object.
+	 * @deprecated use {@link #withDataDictionary(String, DataDictionary)} for assertion-scoped configuration
 	 */
+	@Deprecated
 	public MessageAssert usingDataDictionary(String beginString, DataDictionary dataDictionary) {
 		checkArgument(dataDictionary != null, "'dataDictionary' must not be null");
 
+		Dictionaries.instance().addDataDictionary(beginString, dataDictionary);
+		return this;
+	}
+
+	/**
+	 * Uses a session dictionary only for this assertion chain.
+	 *
+	 * @param beginString the FIX begin string resolved by the dictionary
+	 * @param dataDictionary the dictionary to use
+	 * @return {@code this} assertion object
+	 */
+	public MessageAssert withDataDictionary(String beginString, DataDictionary dataDictionary) {
+		checkArgument(dataDictionary != null, "'dataDictionary' must not be null");
+
 		dictionaries.addDataDictionary(beginString, dataDictionary);
+		return this;
+	}
+
+	/**
+	 * Uses a FIXT application dictionary only for this assertion chain.
+	 *
+	 * @param applVerId the application version identifier, such as {@code ApplVerID.FIX50SP2}
+	 * @param dataDictionary the dictionary to use
+	 * @return {@code this} assertion object
+	 */
+	public MessageAssert withApplicationDataDictionary(String applVerId, DataDictionary dataDictionary) {
+		checkArgument(dataDictionary != null, "'dataDictionary' must not be null");
+
+		dictionaries.addApplicationDataDictionary(applVerId, dataDictionary);
 		return this;
 	}
 }

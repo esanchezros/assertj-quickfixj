@@ -67,7 +67,7 @@ public class MessageHeaderAssert extends AbstractFieldMapAssert<MessageHeaderAss
 	 * @param beginString
 	 */
 	MessageHeaderAssert(Header header, MessageAssert messageAssert, String beginString) {
-		super(header, MessageHeaderAssert.class);
+		super(header, MessageHeaderAssert.class, messageAssert.dictionaries);
 		this.messageAssert = messageAssert;
 		this.beginString = beginString;
 	}
@@ -77,7 +77,9 @@ public class MessageHeaderAssert extends AbstractFieldMapAssert<MessageHeaderAss
 		return beginString;
 	}
 
+	@Override
 	public MessageHeaderAssert hasGroup(int expectedGroupTag) {
+		super.hasGroup(expectedGroupTag);
 		return this;
 	}
 

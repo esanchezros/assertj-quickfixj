@@ -7,11 +7,13 @@
   <properties>
     <maven.compiler.release>11</maven.compiler.release>
     <assertj-quickfixj.version>1.1.0-SNAPSHOT</assertj-quickfixj.version>
+    <assertj-core.version>3.27.7</assertj-core.version>
     <quickfixj.version>2.3.2</quickfixj.version>
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
   </properties>
   <dependencies>
     <dependency><groupId>io.allune</groupId><artifactId>assertj-quickfixj</artifactId><version>${assertj-quickfixj.version}</version><scope>test</scope></dependency>
+    <dependency><groupId>org.assertj</groupId><artifactId>assertj-core</artifactId><version>${assertj-core.version}</version><scope>test</scope></dependency>
     <dependency><groupId>org.quickfixj</groupId><artifactId>quickfixj-core</artifactId><version>${quickfixj.version}</version><scope>test</scope></dependency>
     <dependency><groupId>org.quickfixj</groupId><artifactId>quickfixj-messages-all</artifactId><version>${quickfixj.version}</version><scope>test</scope></dependency>
     <dependency><groupId>junit</groupId><artifactId>junit</artifactId><version>4.13.2</version><scope>test</scope></dependency>
@@ -23,11 +25,18 @@
     <plugins>
       <plugin>
         <groupId>org.apache.maven.plugins</groupId><artifactId>maven-compiler-plugin</artifactId><version>3.14.0</version>
-        <configuration><testIncludes><testInclude>**/PackagedArtifactConsumerTest.java</testInclude></testIncludes></configuration>
+        <configuration><testIncludes><testInclude>**/Packaged*ConsumerTest.java</testInclude></testIncludes></configuration>
       </plugin>
       <plugin>
         <groupId>org.apache.maven.plugins</groupId><artifactId>maven-surefire-plugin</artifactId><version>3.5.3</version>
-        <configuration><includes><include>**/PackagedArtifactConsumerTest.java</include></includes><forkedProcessTimeoutInSeconds>60</forkedProcessTimeoutInSeconds></configuration>
+        <configuration>
+          <includes><include>**/Packaged*ConsumerTest.java</include></includes>
+          <forkedProcessTimeoutInSeconds>60</forkedProcessTimeoutInSeconds>
+          <systemPropertyVariables>
+            <consumer.localRepository>${settings.localRepository}</consumer.localRepository>
+            <consumer.assertjQuickfixjVersion>${assertj-quickfixj.version}</consumer.assertjQuickfixjVersion>
+          </systemPropertyVariables>
+        </configuration>
       </plugin>
     </plugins>
   </build>

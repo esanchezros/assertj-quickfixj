@@ -15,17 +15,20 @@ Plain QuickFIX/J tests often repeat tag lookups, conversions, and hand-written e
 - Semantic message methods such as `isNewOrderSingle()` and `isExecutionReport()`.
 - Header and trailer chaining with `header()`, `trailer()`, and `and()`.
 - Dictionary-aware, typed `hasFieldValue(tag, value)` checks.
+- SessionID, sequence, reject, Logon, and ExecutionReport field assertions.
+- Repeating-group counts, entries, and nested groups.
+- Assertion-scoped custom dictionaries for parallel test safety.
 - Generic `hasMsgType(code)` and `hasMsgTypeName(name)` checks.
 - One test artifact that lets the consumer select QuickFIX/J.
 
 ## Requirements and compatibility
 
-| Library | Java | QuickFIX/J | Status |
-| --- | --- | --- | --- |
-| 1.1.x (`main`) | 11+ | 2.3.2 and 3.0.2 | In development; both are release gates |
-| 1.0.x | 11+ | built with 2.3.2 | Published maintenance line |
+| Library | Java | QuickFIX/J | AssertJ Core | Status |
+| --- | --- | --- | --- | --- |
+| 1.1.x (`main`) | 11+ | 2.3.2 and 3.0.2 | 3.24.2 minimum; 3.27.7 normal | In development; all combinations are release gates |
+| 1.0.x | 11+ | built with 2.3.2 | broad 3.x range | Published maintenance line |
 
-CI runs Java 11, 17, and 21. See [the full compatibility policy](docs/compatibility.adoc).
+CI runs Java 11, 17, 21, and 25. See [the full compatibility policy](docs/compatibility.adoc).
 
 ## Installation
 
@@ -89,6 +92,40 @@ assertThat(message)
     .isNewOrderSingle();
 ```
 
+## Session and sequence assertions
+
+```java
+SessionID sessionID = new SessionID("FIX.4.4", "CLIENT", "BROKER");
+
+assertThat(message)
+    .hasSessionID(sessionID)
+    .header()
+        .hasMsgSeqNum(42)
+        .hasLastMsgSeqNumProcessed(41)
+    .and();
+```
+
+The assertion compares the protocol fields in `SessionID`. It ignores the session qualifier because a qualifier is engine configuration and is not encoded in the FIX message. Sequence Reset and Reject messages can use `hasNewSeqNo`, `hasRefSeqNum`, `hasSessionRejectReason`, and `hasText`.
+
+## Repeating groups
+
+Group indexes are one-based, matching QuickFIX/J:
+
+```java
+assertThat(executionReport)
+    .hasGroupCount(NoPartyIDs.FIELD, 2)
+    .group(NoPartyIDs.FIELD, 1)
+        .hasFieldValue(PartyID.FIELD, "CLIENT")
+        .hasFieldValue(PartyRole.FIELD, 11)
+        .group(NoPartySubIDs.FIELD, 1)
+            .hasFieldValue(PartySubID.FIELD, "DESK-1")
+        .and()
+    .and()
+    .isExecutionReport();
+```
+
+QuickFIX/J components are flattened into their containing `FieldMap`, so component fields use the normal `hasField`, `doesNotHaveField`, and `hasFieldValue` assertions. Nested repeating groups use the same `group` API.
+
 ## Message names and FIXT 1.1
 
 ```java
@@ -102,11 +139,24 @@ For FIXT 1.1, the library resolves the application dictionary from header tag `1
 ```java
 DataDictionary dictionary = new DataDictionary("path/to/FIX44-custom.xml");
 assertThat(message)
-    .usingDataDictionary("FIX.4.4", dictionary)
+    .withDataDictionary("FIX.4.4", dictionary)
     .hasFieldValue(6000, "CustomValue");
 ```
 
-In 1.x, custom dictionary overrides are stored in a process-wide concurrent registry. Access is thread-safe, but conflicting overrides for the same FIX version can affect parallel tests and remain active for the process. Isolate such tests. Assertion-scoped configuration is planned for 2.0; see [ADR 0003](docs/adr/0003-dictionary-state.adoc).
+For FIXT 1.1 application dictionaries, use the application version identifier:
+
+```java
+assertThat(message)
+    .withApplicationDataDictionary(ApplVerID.FIX50SP2, dictionary)
+    .isVersion50sp2()
+    .hasFieldValue(6000, "CustomValue");
+```
+
+Both methods scope the dictionary to one assertion chain, including its header, trailer, and group assertions. Different assertion instances can safely use conflicting dictionaries in parallel.
+
+### Migrating from the global dictionary API
+
+`usingDataDictionary(beginString, dictionary)` is deprecated in 1.1. It retains its process-global behavior for compatibility. Replace it with `withDataDictionary`. Code that intentionally needs the old global side effect can continue to use the deprecated method during the 1.x line, but conflicting registrations remain unsafe in parallel tests.
 
 ## FixMock integration
 
@@ -137,7 +187,7 @@ Verify QuickFIX/J 3.0.2 explicitly with:
 mvn --batch-mode -Dquickfixj.version=3.0.2 verify
 ```
 
-CI runs both 2.3.2 and 3.0.2 on Java 11, 17, and 21. It also checks dependency convergence, coverage, public API compatibility with 1.0.0, and a separately built packaged consumer.
+CI runs QuickFIX/J 2.3.2 and 3.0.2 with AssertJ Core 3.24.2 and 3.27.7 on Java 11, 17, 21, and 25. It also checks dependency convergence, coverage, public API compatibility with 1.0.0, and a separately built packaged consumer.
 
 ## Documentation
 
@@ -154,8 +204,7 @@ CI runs both 2.3.2 and 3.0.2 on Java 11, 17, and 21. It also checks dependency c
 
 ## Current limitations
 
-- Repeating groups and components do not yet have dedicated fluent assertions.
-- Custom dictionary overrides are process-wide in 1.x.
+- The deprecated `usingDataDictionary` method remains process-wide for 1.x compatibility. Use `withDataDictionary` for isolation.
 - Exact failure-message text is not a stable API unless a release note says otherwise.
 
 ## License

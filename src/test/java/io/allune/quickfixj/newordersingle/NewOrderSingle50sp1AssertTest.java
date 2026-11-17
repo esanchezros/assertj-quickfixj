@@ -35,7 +35,7 @@ import static quickfix.FixVersions.FIX50SP2;
  */
 public class NewOrderSingle50sp1AssertTest {
 
-	private NewOrderSingleBuilder<?, ?> messageBuilder;
+	private NewOrderSingleBuilder messageBuilder;
 
 	@Before
 	public void setUp() {

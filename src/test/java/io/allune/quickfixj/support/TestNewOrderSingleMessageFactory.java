@@ -24,12 +24,12 @@ import java.time.LocalDateTime;
  */
 public class TestNewOrderSingleMessageFactory {
 
-	public static NewOrderSingleBuilder<?, ?> newOrderSingleBuilder(String beginString) {
+	public static NewOrderSingleBuilder newOrderSingleBuilder(String beginString) {
 		return NewOrderSingle.builder()
 				.beginString(beginString);
 	}
 
-	public static NewOrderSingleBuilder<?, ?> newOrderSingleBuilderWithDefaults(String beginString) {
+	public static NewOrderSingleBuilder newOrderSingleBuilderWithDefaults(String beginString) {
 		return NewOrderSingle.builder()
 				.beginString(beginString)
 				.clientOrderId("13346")

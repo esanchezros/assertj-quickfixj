@@ -45,13 +45,14 @@
 
 	<properties>
 		<java.version>11</java.version>
+		<project.build.outputTimestamp>2020-01-01T00:00:00Z</project.build.outputTimestamp>
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 		<project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
 
 		<central-publishing-maven-plugin.version>0.12.0</central-publishing-maven-plugin.version>
 		<assertj-core.version>3.27.7</assertj-core.version>
+		<assertj-core.minimum-version>3.24.2</assertj-core.minimum-version>
 		<quickfixj.version>2.3.2</quickfixj.version>
-		<lombok.version>1.18.34</lombok.version>
 		<junit.version>4.13.2</junit.version>
 		<junit.jupiter.version>5.11.3</junit.jupiter.version>
 
@@ -85,12 +86,6 @@
 			<artifactId>quickfixj-messages-all</artifactId>
 			<version>${quickfixj.version}</version>
 			<scope>provided</scope>
-		</dependency>
-		<dependency>
-			<groupId>org.projectlombok</groupId>
-			<artifactId>lombok</artifactId>
-			<version>${lombok.version}</version>
-			<scope>test</scope>
 		</dependency>
 		<!-- test dependencies -->
 		<dependency>

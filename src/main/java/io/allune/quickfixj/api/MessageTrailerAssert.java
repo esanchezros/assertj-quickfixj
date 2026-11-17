@@ -34,7 +34,7 @@ public class MessageTrailerAssert extends AbstractFieldMapAssert<MessageTrailerA
 	 * @param beginString
 	 */
 	MessageTrailerAssert(Trailer trailer, MessageAssert messageAssert, String beginString) {
-		super(trailer, MessageTrailerAssert.class);
+		super(trailer, MessageTrailerAssert.class, messageAssert.dictionaries);
 		this.messageAssert = messageAssert;
 		this.beginString = beginString;
 	}

@@ -13,8 +13,6 @@
 package io.allune.quickfixj.support;
 
 import io.allune.quickfixj.exception.InvalidVersionException;
-import lombok.Builder;
-import lombok.experimental.SuperBuilder;
 import quickfix.Message;
 import quickfix.MessageUtils;
 import quickfix.field.ApplVerID;
@@ -41,7 +39,6 @@ import static quickfix.FixVersions.FIX50SP2;
 /**
  * @author Eduardo Sanchez-Ros
  */
-@SuperBuilder
 public abstract class AbstractMessage {
 
 	String beginString;
@@ -52,10 +49,8 @@ public abstract class AbstractMessage {
 
 	String target;
 
-	@Builder.Default
 	Integer mesSeqNum = 1;
 
-	@Builder.Default
 	LocalDateTime sendingTime = now();
 
 	String signature;

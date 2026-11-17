@@ -91,6 +91,11 @@ public class Messages {
 	}
 
 	public void assertMessageIsOfTypeName(AssertionInfo info, Message actual, String beginString, String expectedMessageTypeName) {
+		assertMessageIsOfTypeName(info, actual, beginString, expectedMessageTypeName, dictionaries);
+	}
+
+	public void assertMessageIsOfTypeName(AssertionInfo info, Message actual, String beginString,
+			String expectedMessageTypeName, Dictionaries dictionaries) {
 		objects.assertNotNull(info, actual);
 
 		String expectedMessageType = dictionaries.getSessionDataDictionary(beginString).getMsgType(expectedMessageTypeName);
@@ -112,7 +117,18 @@ public class Messages {
 		objects.assertNotNull(info, actual);
 
 		int actualFieldTag = getFieldTagFromFieldClass(info, actualFieldClass);
-		Object actualFieldValue = getActualValue(info, actual, actualFieldClass, actualFieldTag);
+		Object actualFieldValue;
+		try {
+			actualFieldValue = getActualValue(info, actual, actualFieldClass, actualFieldTag);
+		} catch (RuntimeException conversionFailure) {
+			try {
+				String rawValue = actual.getString(actualFieldTag);
+				throw failures.failure(info,
+						fieldShouldHaveValue(actual, actualFieldClass, actualFieldTag, rawValue, expectedFieldValue));
+			} catch (FieldNotFound fieldNotFound) {
+				throw failures.failure(info, shouldHaveField(actualFieldClass, actualFieldTag));
+			}
+		}
 		if (!actualFieldValue.equals(expectedFieldValue)) {
 			throw failures.failure(info, fieldShouldHaveValue(actual, actualFieldClass, actualFieldTag, actualFieldValue, expectedFieldValue));
 		}
@@ -179,6 +195,11 @@ public class Messages {
 	}
 
 	public Object getFieldValue(int fieldTag, String beginString, FieldMap actual) throws FieldNotFoundException {
+		return getFieldValue(fieldTag, beginString, actual, dictionaries);
+	}
+
+	public Object getFieldValue(int fieldTag, String beginString, FieldMap actual, Dictionaries dictionaries)
+			throws FieldNotFoundException {
 		DataDictionary dataDictionary = dictionaries.getSessionDataDictionary(beginString);
 		FieldType fieldType = dataDictionary.getFieldType(fieldTag);
 		if (fieldType == null) {

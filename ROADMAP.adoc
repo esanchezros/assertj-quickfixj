@@ -37,24 +37,25 @@ Provide readable, stable AssertJ assertions for normal QuickFIX/J `Message` valu
 
 === 1.1.0 - Compatibility and release reliability
 
-* Verify QuickFIX/J 2.3.2 and 3.0.2 on Java 11, 17, and 21.
+* Verify QuickFIX/J 2.3.2 and 3.0.2 on Java 11, 17, 21, and 25.
 * Remove source coupling to aliases removed in QuickFIX/J 3.0.
 * Restore the regression tests that were merged to the historical `master` branch.
 * Add dependency convergence, coverage, packaged-consumer, and public API gates.
 * Make `mvn --batch-mode verify` the canonical build.
 * Publish compatibility, support, contribution, and release documentation.
+* Add assertion-scoped dictionary configuration while preserving the deprecated global API.
+* Add SessionID, field-absence, repeating-group, nested-group, and protocol-field assertions.
 
 === 1.2.0 - Assertion depth
 
-* Add first-class repeating-group and component assertions.
-* Improve enum, decimal, timestamp, and malformed-message diagnostics.
+* Add component-specific conveniences and reusable group extraction APIs where they improve readability.
+* Expand enum, decimal, timestamp, and malformed-message diagnostics.
 * Expand representative coverage across FIX 4.2, FIX 4.4, and FIXT 1.1 with FIX 5.0 SP2.
 * Add reusable conditions and extraction APIs where they improve AssertJ composition.
 
 === 2.0.0 - State isolation
 
-* Replace process-wide custom dictionary overrides with assertion-scoped configuration.
-* Remove obsolete or misleading APIs only with migration documentation.
+* Remove the deprecated process-wide dictionary API with migration documentation.
 * Review package boundaries so `internal` types are not accidentally treated as public extension points.
 
 == Ecosystem

@@ -32,7 +32,7 @@ mvn --batch-mode -Prelease -Dgpg.skip=true clean verify
 
 == Required evidence
 
-Record Java 11, 17, and 21 results with QuickFIX/J 2.3.2 and 3.0.2; unit-test and coverage results; packaged-consumer results; binary and source compatibility results against 1.0.0; dependency convergence; generated source and Javadoc archives; and interoperability results from FixMock when available.
+Record Java 11, 17, 21, and 25 results with QuickFIX/J 2.3.2 and 3.0.2; AssertJ Core 3.24.2 and 3.27.7 results; unit-test and coverage results; packaged-consumer results; binary and source compatibility results against 1.0.0; dependency convergence; generated source and Javadoc archives; and interoperability results from FixMock when available.
 
 == Maven Central
 

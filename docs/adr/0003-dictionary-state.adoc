@@ -1,19 +1,19 @@
 = ADR 0003: Dictionary override state in 1.x
 
-Status: Accepted
+Status: Superseded for 1.1.0
 
 == Context
 
-`MessageAssert.usingDataDictionary` stores custom dictionaries in a process-wide concurrent registry. Concurrent access is safe, but overrides persist and tests using different dictionaries for the same FIX version can affect one another. Changing this behavior requires public API and chaining design work.
+`MessageAssert.usingDataDictionary` stores custom dictionaries in a process-wide concurrent registry. Concurrent access is safe, but overrides persist and tests using different dictionaries for the same FIX version can affect one another. Public consumers can rely on the method signature and may rely on its global side effect.
 
 == Decision
 
-Keep the existing behavior for 1.x compatibility. Document the process-wide scope. Tests that register a custom dictionary must avoid conflicting parallel registration. Design assertion-scoped dictionary configuration for 2.0.
+Keep `usingDataDictionary` and its global behavior for compatibility, but deprecate it. Add `withDataDictionary` and `withApplicationDataDictionary`. The new methods attach dictionary overrides to one assertion chain. Header, trailer, group, and nested-group assertions share that chain-local registry.
 
 == Consequences
 
-Normal assertions using bundled QuickFIX/J dictionaries remain parallel-safe. Conflicting custom overrides require isolation. This limitation stays visible in the README and roadmap.
+New code can use different dictionaries for the same FIX version in parallel without contamination. Existing code using the deprecated method retains its process-global behavior and limitation. The global registry remains only as a compatibility fallback.
 
 == Alternatives
 
-A breaking 1.1 change was rejected because it would make the compatibility release larger and could invalidate existing chains. Leaving the behavior undocumented was rejected because it hides a test-order risk.
+Changing `usingDataDictionary` to assertion scope was rejected because it would silently remove a side effect on which existing tests may depend. Removing it was rejected as a binary and source incompatibility.

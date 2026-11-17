@@ -19,9 +19,13 @@ import io.allune.quickfixj.internal.Versions;
 import org.assertj.core.api.AbstractAssert;
 import org.assertj.core.internal.Failures;
 import quickfix.FieldMap;
+import quickfix.Group;
 
 import static io.allune.quickfixj.error.FieldShouldHaveValue.fieldShouldHaveValue;
+import static io.allune.quickfixj.error.ShouldHaveGroup.shouldHaveGroup;
+import static io.allune.quickfixj.error.ShouldHaveGroupCount.shouldHaveGroupCount;
 import static io.allune.quickfixj.error.ShouldHaveField.shouldHaveField;
+import static io.allune.quickfixj.error.ShouldNotHaveField.shouldNotHaveField;
 
 /**
  * Base class for Message, Header and Trailer assertions
@@ -49,7 +53,19 @@ public abstract class AbstractFieldMapAssert<SELF extends AbstractFieldMapAssert
 	 * @param selfType the "self type".
 	 */
 	protected AbstractFieldMapAssert(ACTUAL actual, Class<SELF> selfType) {
+		this(actual, selfType, Dictionaries.instance());
+	}
+
+	/**
+	 * Creates a new assertion using the supplied dictionary registry.
+	 *
+	 * @param actual       the actual value to verify
+	 * @param selfType     the "self type"
+	 * @param dictionaries the dictionary registry for this assertion chain
+	 */
+	protected AbstractFieldMapAssert(ACTUAL actual, Class<SELF> selfType, Dictionaries dictionaries) {
 		super(actual, selfType);
+		this.dictionaries = dictionaries;
 	}
 
 	/**
@@ -80,6 +96,76 @@ public abstract class AbstractFieldMapAssert<SELF extends AbstractFieldMapAssert
 	}
 
 	/**
+	 * Verifies that the actual FieldMap does not have a field with the provided tag number.
+	 *
+	 * @param unexpectedTag the field tag that must be absent
+	 * @return {@code this} assertion object
+	 */
+	public SELF doesNotHaveField(int unexpectedTag) {
+		isNotNull();
+		if (actual.isSetField(unexpectedTag)) {
+			throw failures.failure(info, shouldNotHaveField(actual, unexpectedTag));
+		}
+		return (SELF) this;
+	}
+
+	/**
+	 * Verifies that the actual FieldMap contains at least one entry for the repeating-group count tag.
+	 *
+	 * @param groupTag the repeating-group count tag
+	 * @return {@code this} assertion object
+	 */
+	public SELF hasGroup(int groupTag) {
+		isNotNull();
+		if (!actual.hasGroup(groupTag)) {
+			throw failures.failure(info, shouldHaveGroup(actual, groupTag, 1, actual.getGroupCount(groupTag)));
+		}
+		return (SELF) this;
+	}
+
+	/**
+	 * Verifies the number of entries in a repeating group.
+	 *
+	 * @param groupTag the repeating-group count tag
+	 * @param expectedCount the expected number of group entries
+	 * @return {@code this} assertion object
+	 */
+	public SELF hasGroupCount(int groupTag, int expectedCount) {
+		isNotNull();
+		if (expectedCount < 0) {
+			throw new IllegalArgumentException("'expectedCount' must not be negative");
+		}
+		int actualCount = actual.getGroupCount(groupTag);
+		if (actualCount != expectedCount) {
+			throw failures.failure(info, shouldHaveGroupCount(actual, groupTag, actualCount, expectedCount));
+		}
+		return (SELF) this;
+	}
+
+	/**
+	 * Selects a one-based entry from a repeating group.
+	 *
+	 * @param groupTag the repeating-group count tag
+	 * @param index the one-based group entry index
+	 * @return an assertion for the selected group entry
+	 */
+	public GroupAssert<SELF> group(int groupTag, int index) {
+		isNotNull();
+		if (index <= 0) {
+			throw new IllegalArgumentException("'index' must be greater than 0");
+		}
+		if (!actual.hasGroup(index, groupTag)) {
+			throw failures.failure(info, shouldHaveGroup(actual, groupTag, index, actual.getGroupCount(groupTag)));
+		}
+		try {
+			Group group = actual.getGroup(index, groupTag);
+			return new GroupAssert<>(group, (SELF) this, getBeginString(), dictionaries);
+		} catch (quickfix.FieldNotFound fieldNotFound) {
+			throw failures.failure(info, shouldHaveGroup(actual, groupTag, index, actual.getGroupCount(groupTag)));
+		}
+	}
+
+	/**
 	 * Verifies that the actual FieldMap has a field with the expected value.
 	 *
 	 * @param expectedFieldTag The expected tag number of the field.
@@ -100,13 +186,19 @@ public abstract class AbstractFieldMapAssert<SELF extends AbstractFieldMapAssert
 		hasField(expectedFieldTag);
 
 		try {
-			Object actualFieldValue = messages.getFieldValue(expectedFieldTag, getBeginString(), this.actual);
+			Object actualFieldValue = messages.getFieldValue(expectedFieldTag, getBeginString(), this.actual, dictionaries);
 			if (!expectedFieldValue.equals(actualFieldValue))
 				throw failures.failure(info, fieldShouldHaveValue(actual, expectedFieldTag, actualFieldValue, expectedFieldValue));
 		} catch (FieldNotFoundException ex) {
 			throw failures.failure(info, shouldHaveField(actual, expectedFieldTag));
-		} catch (Exception ex) {
-			throw new RuntimeException(ex.getMessage(), ex);
+		} catch (RuntimeException ex) {
+			try {
+				String rawValue = actual.getString(expectedFieldTag);
+				throw failures.failure(info,
+						fieldShouldHaveValue(actual, expectedFieldTag, rawValue, expectedFieldValue));
+			} catch (quickfix.FieldNotFound fieldNotFound) {
+				throw failures.failure(info, shouldHaveField(actual, expectedFieldTag));
+			}
 		}
 
 		return (SELF) this;
