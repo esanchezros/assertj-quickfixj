@@ -7,16 +7,19 @@ Notable changes follow semantic versioning intent.
 ### Added
 
 - Source and test compatibility gates for QuickFIX/J 2.3.2 and 3.0.2.
-- Java 11, 17, and 21 CI matrix.
+- Java 11, 17, 21, and 25 CI matrix.
 - Packaged-artifact consumer verification.
 - Dependency convergence, JaCoCo baseline, and japicmp public API checks.
 - Compatibility, support, contribution, architecture decision, and release documentation.
+- Assertion-scoped session and FIXT application dictionaries.
+- SessionID, field-absence, repeating-group, nested-group, and protocol-field assertions.
 
 ### Changed
 
 - Replaced QuickFIX/J message-type aliases removed in 3.0.x with stable FIX protocol codes while preserving public assertion methods.
 - Restored FIXT dictionary routing and regression tests from pull request 9, which had been merged to the historical `master` branch instead of `main`.
 - Pinned AssertJ Core to 3.27.7 instead of resolving a wide version range.
+- Declared AssertJ Core 3.24.2 as the tested minimum while retaining 3.27.7 as the normal version.
 - Advanced the development version to `1.1.0-SNAPSHOT`.
 - Made `mvn --batch-mode verify` the canonical build command.
 
@@ -24,6 +27,9 @@ Notable changes follow semantic versioning intent.
 
 - JaCoCo execution data is now retained and coverage is enforced at the current 45 percent line baseline.
 - Test fixtures no longer compile against QuickFIX/J APIs removed in 3.0.x.
+- Test fixtures no longer require Lombok, so annotation processing cannot block the Java 25 release gate.
+- `MessageHeaderAssert.hasGroup` now performs the assertion instead of returning success without inspection.
+- Custom dictionaries configured through the new scoped API no longer contaminate parallel assertions.
 
 ### Compatibility
 

@@ -16,14 +16,15 @@ concurrency:
 
 jobs:
   verify:
-    name: Java ${{ matrix.java }} / QuickFIX/J ${{ matrix.quickfixj }}
+    name: Java ${{ matrix.java }} / QuickFIX/J ${{ matrix.quickfixj }} / AssertJ ${{ matrix.assertj }}
     runs-on: ubuntu-24.04
     timeout-minutes: 15
     strategy:
       fail-fast: false
       matrix:
-        java: [ 11, 17, 21 ]
+        java: [ 11, 17, 21, 25 ]
         quickfixj: [ 2.3.2, 3.0.2 ]
+        assertj: [ 3.24.2, 3.27.7 ]
     steps:
       - name: Checkout
         uses: actions/checkout@v5
@@ -36,10 +37,10 @@ jobs:
           cache: maven
 
       - name: Verify
-        run: mvn --batch-mode -Dquickfixj.version=${{ matrix.quickfixj }} verify
+        run: mvn --batch-mode -Dquickfixj.version=${{ matrix.quickfixj }} -Dassertj-core.version=${{ matrix.assertj }} verify
 
       - name: Install packaged artifact
-        run: mvn --batch-mode -Dquickfixj.version=${{ matrix.quickfixj }} -DskipTests -Djacoco.skip=true install
+        run: mvn --batch-mode -Dquickfixj.version=${{ matrix.quickfixj }} -Dassertj-core.version=${{ matrix.assertj }} -DskipTests -Djacoco.skip=true install
 
       - name: Verify packaged consumer
-        run: mvn --batch-mode -f consumer-pom.xml -Dquickfixj.version=${{ matrix.quickfixj }} clean test
+        run: mvn --batch-mode -f consumer-pom.xml -Dquickfixj.version=${{ matrix.quickfixj }} -Dassertj-core.version=${{ matrix.assertj }} clean test

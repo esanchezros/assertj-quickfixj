@@ -11,8 +11,8 @@ AssertJ QuickFIX/J is a test library. Its QuickFIX/J dependencies use Maven `pro
 |`1.1.x`
 |11
 |2.3.2 and 3.0.2
-|3.27.7
-|Active; both QuickFIX/J versions are release gates
+|3.24.2 minimum; 3.27.7 normal
+|Active; both QuickFIX/J and both AssertJ versions are release gates
 
 |`1.0.x`
 |11
@@ -21,7 +21,9 @@ AssertJ QuickFIX/J is a test library. Its QuickFIX/J dependencies use Maven `pro
 |Maintenance; 3.0.x was not a source-build release gate
 |===
 
-Continuous integration runs Java 11, 17, and 21 for each supported QuickFIX/J version. Later patch releases in the 2.3.x and 3.0.x lines may work, but they are not support claims until added to the release matrix.
+Continuous integration runs Java 11, 17, 21, and 25 for each supported QuickFIX/J and AssertJ combination. Later patch releases in the 2.3.x and 3.0.x QuickFIX/J lines may work, but they are not support claims until added to the release matrix.
+
+AssertJ Core 3.24.2 is the minimum supported version. The project POM pins 3.27.7 as the normal version instead of publishing an open-ended range. A consumer can select any compatible AssertJ 3.x version through dependency management, but releases verify the minimum and normal versions explicitly.
 
 == Dependency model
 

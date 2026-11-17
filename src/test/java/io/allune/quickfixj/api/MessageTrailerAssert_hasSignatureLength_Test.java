@@ -24,7 +24,7 @@ import static quickfix.FixVersions.BEGINSTRING_FIX40;
 
 public class MessageTrailerAssert_hasSignatureLength_Test {
 
-	NewOrderSingle.NewOrderSingleBuilder<?, ?> messageBuilder;
+	NewOrderSingle.NewOrderSingleBuilder messageBuilder;
 
 	@Before
 	public void setUp() {

@@ -15,7 +15,7 @@ Architecture decision records document durable choices that affect compatibility
 |Accepted
 
 |link:0003-dictionary-state.adoc[0003]
-|Treat process-wide custom dictionary overrides as a documented 1.x limitation
+|Preserve the deprecated process-wide override and add assertion-scoped dictionaries
 |Accepted
 |===
 

@@ -13,7 +13,11 @@
 package io.allune.quickfixj.consumer;
 
 import org.junit.Test;
+import quickfix.Group;
 import quickfix.Message;
+import quickfix.SessionID;
+import quickfix.field.NoPartyIDs;
+import quickfix.field.PartyID;
 import quickfix.field.Symbol;
 
 import static io.allune.quickfixj.api.Assertions.assertThat;
@@ -25,11 +29,23 @@ public class PackagedArtifactConsumerTest {
         Message message = new Message();
         message.getHeader().setString(8, "FIX.4.4");
         message.getHeader().setString(35, "D");
+        message.getHeader().setString(49, "CLIENT");
+        message.getHeader().setString(56, "BROKER");
         message.setString(Symbol.FIELD, "AAPL");
+        Group party = new Group(NoPartyIDs.FIELD, PartyID.FIELD);
+        party.setString(PartyID.FIELD, "CLIENT");
+        message.addGroup(party);
 
         assertThat(message)
                 .isVersion44()
                 .isNewOrderSingle()
-                .hasFieldValue(Symbol.FIELD, "AAPL");
+                .hasSessionID(new SessionID("FIX.4.4", "CLIENT", "BROKER"))
+                .hasFieldValue(Symbol.FIELD, "AAPL")
+                .doesNotHaveField(44)
+                .hasGroupCount(NoPartyIDs.FIELD, 1)
+                .group(NoPartyIDs.FIELD, 1)
+                    .hasFieldValue(PartyID.FIELD, "CLIENT")
+                .and()
+                .isNewOrderSingle();
     }
 }

@@ -25,20 +25,32 @@ import java.util.concurrent.ConcurrentHashMap;
  */
 public class Dictionaries {
 
-	private static final Dictionaries INSTANCE = new Dictionaries();
+	private static final Dictionaries INSTANCE = new Dictionaries(null);
 
 	private static final DefaultDataDictionaryProvider dataDictionaryProvider = new DefaultDataDictionaryProvider();
+
+	private final Dictionaries fallback;
 
 	// Local overrides to allow dynamic registration from tests/clients without relying on provider add* APIs
 	private final Map<String, DataDictionary> sessionOverrides = new ConcurrentHashMap<>();
 	private final Map<String, DataDictionary> applicationOverrides = new ConcurrentHashMap<>();
 
-	private Dictionaries() {
-		//
+	private Dictionaries(Dictionaries fallback) {
+		this.fallback = fallback;
 	}
 
 	public static Dictionaries instance() {
 		return INSTANCE;
+	}
+
+	/**
+	 * Creates an isolated dictionary registry that falls back to the legacy process-wide registry and then to the
+	 * QuickFIX/J default dictionaries.
+	 *
+	 * @return a new isolated dictionary registry
+	 */
+	public static Dictionaries scoped() {
+		return new Dictionaries(INSTANCE);
 	}
 
 	public DataDictionary getSessionDataDictionary(String beginString) {
@@ -57,7 +69,9 @@ public class Dictionaries {
 		if (FixVersions.FIX50.equals(beginString)) {
 			return getApplicationDataDictionary(ApplVerID.FIX50); // ApplVerID.FIX50
 		}
-		return dataDictionaryProvider.getSessionDataDictionary(beginString);
+		return fallback != null
+				? fallback.getSessionDataDictionary(beginString)
+				: dataDictionaryProvider.getSessionDataDictionary(beginString);
 	}
 
 	public void addDataDictionary(String beginString, DataDictionary dataDictionary) {
@@ -66,7 +80,12 @@ public class Dictionaries {
 
 	public DataDictionary getApplicationDataDictionary(String applVerId) {
 		DataDictionary dd = applicationOverrides.get(applVerId);
-		return dd != null ? dd : dataDictionaryProvider.getApplicationDataDictionary(new ApplVerID(applVerId));
+		if (dd != null) {
+			return dd;
+		}
+		return fallback != null
+				? fallback.getApplicationDataDictionary(applVerId)
+				: dataDictionaryProvider.getApplicationDataDictionary(new ApplVerID(applVerId));
 	}
 
 	public void addApplicationDataDictionary(String applVerId, DataDictionary dataDictionary) {

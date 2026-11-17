@@ -12,7 +12,6 @@
  */
 package io.allune.quickfixj.support;
 
-import lombok.experimental.SuperBuilder;
 import quickfix.Message;
 import quickfix.field.Account;
 import quickfix.field.ClOrdID;
@@ -44,7 +43,6 @@ import static quickfix.FixVersions.FIX50SP2;
 /**
  * @author Eduardo Sanchez-Ros
  */
-@SuperBuilder
 public class NewOrderSingle extends AbstractMessage {
 
 	private static Map<String, Supplier<? extends Message>> map = Stream.of(
@@ -75,6 +73,98 @@ public class NewOrderSingle extends AbstractMessage {
 	private String account;
 
 	private LocalDateTime transactTime;
+
+	public static NewOrderSingleBuilder builder() {
+		return new NewOrderSingleBuilder();
+	}
+
+	public static final class NewOrderSingleBuilder {
+		private final NewOrderSingle value = new NewOrderSingle();
+
+		public NewOrderSingleBuilder beginString(String beginString) {
+			value.beginString = beginString;
+			return this;
+		}
+
+		public NewOrderSingleBuilder applVerId(String applVerId) {
+			value.applVerId = applVerId;
+			return this;
+		}
+
+		public NewOrderSingleBuilder sender(String sender) {
+			value.sender = sender;
+			return this;
+		}
+
+		public NewOrderSingleBuilder target(String target) {
+			value.target = target;
+			return this;
+		}
+
+		public NewOrderSingleBuilder mesSeqNum(int mesSeqNum) {
+			value.mesSeqNum = mesSeqNum;
+			return this;
+		}
+
+		public NewOrderSingleBuilder sendingTime(LocalDateTime sendingTime) {
+			value.sendingTime = sendingTime;
+			return this;
+		}
+
+		public NewOrderSingleBuilder signature(String signature) {
+			value.signature = signature;
+			return this;
+		}
+
+		public NewOrderSingleBuilder clientOrderId(String clientOrderId) {
+			value.clientOrderId = clientOrderId;
+			return this;
+		}
+
+		public NewOrderSingleBuilder handlInst(char handlInst) {
+			value.handlInst = handlInst;
+			return this;
+		}
+
+		public NewOrderSingleBuilder symbol(String symbol) {
+			value.symbol = symbol;
+			return this;
+		}
+
+		public NewOrderSingleBuilder side(char side) {
+			value.side = side;
+			return this;
+		}
+
+		public NewOrderSingleBuilder orderQty(double orderQty) {
+			value.orderQty = orderQty;
+			return this;
+		}
+
+		public NewOrderSingleBuilder orderType(char orderType) {
+			value.orderType = orderType;
+			return this;
+		}
+
+		public NewOrderSingleBuilder price(double price) {
+			value.price = price;
+			return this;
+		}
+
+		public NewOrderSingleBuilder account(String account) {
+			value.account = account;
+			return this;
+		}
+
+		public NewOrderSingleBuilder transactTime(LocalDateTime transactTime) {
+			value.transactTime = transactTime;
+			return this;
+		}
+
+		public NewOrderSingle build() {
+			return value;
+		}
+	}
 
 	@Override
 	protected <T extends Message> void addMessageFields(T order) {
