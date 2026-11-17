@@ -30,6 +30,7 @@ Notable changes follow semantic versioning intent.
 - Test fixtures no longer require Lombok, so annotation processing cannot block the Java 25 release gate.
 - `MessageHeaderAssert.hasGroup` now performs the assertion instead of returning success without inspection.
 - Custom dictionaries configured through the new scoped API no longer contaminate parallel assertions.
+- Normal verification no longer resolves the release-only Central publishing extension in every CI matrix job.
 
 ### Compatibility
 
