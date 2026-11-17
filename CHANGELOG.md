@@ -2,6 +2,8 @@
 
 Notable changes follow semantic versioning intent.
 
+## [Unreleased]
+
 ## [1.1.0] - 2026-11-17
 
 ### Added
