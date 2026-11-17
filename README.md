@@ -25,7 +25,7 @@ Plain QuickFIX/J tests often repeat tag lookups, conversions, and hand-written e
 
 | Library | Java | QuickFIX/J | AssertJ Core | Status |
 | --- | --- | --- | --- | --- |
-| 1.1.x (`main`) | 11+ | 2.3.2 and 3.0.2 | 3.24.2 minimum; 3.27.7 normal | In development; all combinations are release gates |
+| 1.1.x | 11+ | 2.3.2 and 3.0.2 | 3.24.2 minimum; 3.27.7 normal | Active; all combinations are release gates |
 | 1.0.x | 11+ | built with 2.3.2 | broad 3.x range | Published maintenance line |
 
 CI runs Java 11, 17, 21, and 25. See [the full compatibility policy](docs/compatibility.adoc).
@@ -38,13 +38,13 @@ The current release is on Maven Central. Add it in test scope:
 <dependency>
   <groupId>io.allune</groupId>
   <artifactId>assertj-quickfixj</artifactId>
-  <version>1.0.0</version>
+  <version>1.1.0</version>
   <scope>test</scope>
 </dependency>
 ```
 
 ```kotlin
-testImplementation("io.allune:assertj-quickfixj:1.0.0")
+testImplementation("io.allune:assertj-quickfixj:1.1.0")
 ```
 
 QuickFIX/J is intentionally `provided`. Your application or test suite must supply `quickfixj-core` and the message module it uses. This library does not change the engine version selected by the application.
