@@ -6,6 +6,7 @@ Nothing in this checklist authorizes publication. The maintainer must explicitly
 
 - [ ] Milestone issues are closed or explicitly deferred.
 - [ ] Root POM, `consumer-pom.xml`, README examples, and changelog use the intended release version.
+- [ ] The published POM SCM tag is `1.1.0`.
 - [ ] `mvn --batch-mode verify` passes from a clean checkout with QuickFIX/J 2.3.2.
 - [ ] The same command passes with `-Dquickfixj.version=3.0.2`.
 - [ ] CI passes Java 11, 17, 21, and 25 for both QuickFIX/J versions.
@@ -15,6 +16,7 @@ Nothing in this checklist authorizes publication. The maintainer must explicitly
 - [ ] JaCoCo line coverage remains at or above 45 percent.
 - [ ] japicmp reports no binary or source incompatibility with 1.0.0.
 - [ ] `mvn --batch-mode -Prelease -Dgpg.skip=true clean verify` produces valid main, source, and Javadoc JARs.
+- [ ] The release profile rejects SNAPSHOT project versions and dependencies.
 - [ ] POM metadata, licenses, checksums, signatures, and Maven coordinates are reviewed.
 - [ ] README, compatibility table, changelog, and migration notes are final.
 - [ ] FixMock consumes the candidate successfully with QuickFIX/J 2.3.2 and 3.0.2.
@@ -22,6 +24,8 @@ Nothing in this checklist authorizes publication. The maintainer must explicitly
 
 ## Approval gates
 
+- [ ] The exact release commit is merged and checked out in a clean worktree.
+- [ ] A signed bundle is created with `-DskipUpload=true` and inspected locally.
 - [ ] Maintainer explicitly approves signed deployment.
 - [ ] Maintainer inspects the validated Central deployment.
 - [ ] Maintainer explicitly approves Central publication.

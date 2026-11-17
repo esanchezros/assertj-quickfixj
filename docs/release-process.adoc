@@ -2,51 +2,109 @@
 
 == Ownership
 
-Only a maintainer publishes artifacts, creates tags, or marks a GitHub release final. Pull requests and automated agents must not publish or tag without explicit maintainer approval.
+Only a maintainer publishes artifacts, creates tags, or marks a GitHub release final. A merged release-preparation pull request does not authorize deployment or publication.
 
-== Preparation
+== Shared standard
 
-. Confirm the target milestone and that issues are closed or explicitly deferred.
-. Review public API changes, dependency changes, compatibility, and migration notes.
-. Set the intended release version and update the changelog and examples.
-. Update both the root POM and `consumer-pom.xml` to the intended release version.
-. Run the full Java and QuickFIX/J matrix from a clean checkout.
-. Run the packaged-consumer fixture.
-. Confirm dependency convergence, JaCoCo coverage, and japicmp results.
-. Build source and Javadoc artifacts with GPG disabled for inspection.
-. Confirm Maven coordinates, POM metadata, licenses, and signing configuration.
+This lifecycle is the standard for AssertJ QuickFIX/J, FixMock, and the QuickFIX/J Spring Boot starter:
 
-The canonical verification command is:
+* Prepare the release on a `release/<version>` branch from a green mainline.
+* Commit the exact non-SNAPSHOT version, changelog, SCM tag, and documentation before deployment.
+* Keep the Central publishing plugin, source JAR, Javadoc JAR, signing, and release-only Enforcer rules in the `release` Maven profile.
+* Configure Central with `autoPublish=false` and `waitUntil=validated`.
+* Upload and validate first. Publish separately in the Central Portal after inspection.
+* Create the Git tag only after Central reports the deployment as `PUBLISHED`.
+* Prepare the next development SNAPSHOT in a separate commit or pull request.
+
+Use plain semantic versions for tags, for example `1.1.0`, `0.2.0`, or `4.4.0`.
+
+== Version preparation
+
+The Maven version mechanism differs by repository, but the release lifecycle does not:
+
+[cols="2,4"]
+|===
+|Repository |Version update
+
+|AssertJ QuickFIX/J
+|Set the root project and external consumer fixture to the release version.
+
+|FixMock
+|Run `mvn --batch-mode versions:set -DnewVersion=<version> -DgenerateBackupPoms=false` so the parent and reactor modules use the same version.
+
+|QuickFIX/J Spring Boot starter
+|Run `mvn --batch-mode versions:set-property -Dproperty=revision -DnewVersion=<version> -DgenerateBackupPoms=false` because the build uses the CI-friendly `revision` property and flattened POMs.
+|===
+
+For AssertJ QuickFIX/J 1.1.0, confirm all of the following before merging the release branch:
+
+* `pom.xml` and `consumer-pom.xml` use `1.1.0`.
+* The SCM tag in the published POM is `1.1.0`.
+* README installation examples use `1.1.0`.
+* The changelog contains a dated `1.1.0` section.
+
+== Verification
+
+Run the canonical build and the release artifact build from a clean checkout:
 
 [source,shell]
 ----
-mvn --batch-mode verify
-----
-
-The release candidate artifact inspection command is:
-
-[source,shell]
-----
+mvn --batch-mode clean verify
 mvn --batch-mode -Prelease -Dgpg.skip=true clean verify
 ----
 
-== Required evidence
+Record Java 11, 17, 21, and 25 results with QuickFIX/J 2.3.2 and 3.0.2; AssertJ Core 3.24.2 and 3.27.7 results; packaged-consumer results; dependency convergence; JaCoCo coverage; japicmp compatibility with 1.0.0; source and Javadoc archives; and available FixMock and starter interoperability results.
 
-Record Java 11, 17, 21, and 25 results with QuickFIX/J 2.3.2 and 3.0.2; AssertJ Core 3.24.2 and 3.27.7 results; unit-test and coverage results; packaged-consumer results; binary and source compatibility results against 1.0.0; dependency convergence; generated source and Javadoc archives; and interoperability results from FixMock when available.
+The release profile rejects SNAPSHOT project versions and SNAPSHOT dependencies.
+
+== Credentials and signing
+
+Configure a Central Portal user token under server ID `central` in the maintainer's Maven `settings.xml`. Do not commit credentials.
+
+Use GPG key `E669C3E4ABB2AC58` through `gpg-agent` on a workstation. Prime the agent before the batch build. For an agent-less CI release, provide the passphrase through the `MAVEN_GPG_PASSPHRASE` environment variable from a secret store.
+
+Do not pass `gpg.passphrase` on the command line and do not copy a passphrase from `settings.xml` into shell history. The release profile enables Maven GPG Plugin best-practice enforcement.
+
+== Candidate bundle
+
+After the release commit is merged, check out that exact commit and create a signed bundle without uploading it:
+
+[source,shell]
+----
+mvn --batch-mode -Prelease -Dgpg.keyname=E669C3E4ABB2AC58 -DskipUpload=true clean deploy
+----
+
+Inspect `target/central-publishing/central-bundle.zip`. Confirm the POM, main JAR, source JAR, Javadoc JAR, signatures, checksums, coordinates, license, and SCM metadata.
 
 == Maven Central
 
-The Central plugin is configured with automatic publication disabled. After explicit approval, the maintainer signs and deploys the release bundle. The maintainer inspects the validated deployment in the Central Portal and separately approves publication. Credentials and signing keys stay outside the repository.
+After explicit maintainer approval, upload the same verified commit:
 
-== After publication
+[source,shell]
+----
+mvn --batch-mode -Prelease -Dgpg.keyname=E669C3E4ABB2AC58 clean deploy
+----
 
-. Resolve the released POM, JAR, source JAR, and Javadoc JAR from Maven Central using a fresh local repository.
-. Create the signed or annotated Git tag.
-. Publish the GitHub release and release notes.
-. Update README examples if they still use a development version.
-. Advance to the next development version.
-. Confirm FixMock and starter compatibility workflows against the released version.
+The command uploads the signed bundle and waits for Central validation. It does not publish automatically. Open the Central Portal deployments page, inspect the validated deployment, and explicitly publish it. Record the deployment ID.
+
+== Tag and GitHub release
+
+After Central reports `PUBLISHED`:
+
+[source,shell]
+----
+git tag -s 1.1.0 -m "AssertJ QuickFIX/J 1.1.0"
+git push origin 1.1.0
+----
+
+Create the GitHub release from the tag and the finalized changelog. Resolve the released POM and all three JARs from Maven Central using a fresh local Maven repository.
+
+== Next development iteration
+
+Set the project and consumer fixture to the next development version, normally `1.2.0-SNAPSHOT`, in a separate pull request. Keep README installation examples on the latest published release until the next release.
+
+Update FixMock and the starter through separate dependency pull requests, then run their compatibility workflows against the released artifact.
 
 == Failed releases
 
-Published Maven artifacts are immutable. Stop on any validation failure. Do not replace a published version; prepare and verify a corrected patch release.
+Stop on any validation or publication failure. Published Maven artifacts are immutable. Do not replace a published version; prepare and verify a corrected patch release.

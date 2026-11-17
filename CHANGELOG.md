@@ -2,7 +2,7 @@
 
 Notable changes follow semantic versioning intent.
 
-## [Unreleased] - proposed 1.1.0
+## [1.1.0] - 2026-11-17
 
 ### Added
 
@@ -20,7 +20,6 @@ Notable changes follow semantic versioning intent.
 - Restored FIXT dictionary routing and regression tests from pull request 9, which had been merged to the historical `master` branch instead of `main`.
 - Pinned AssertJ Core to 3.27.7 instead of resolving a wide version range.
 - Declared AssertJ Core 3.24.2 as the tested minimum while retaining 3.27.7 as the normal version.
-- Advanced the development version to `1.1.0-SNAPSHOT`.
 - Made `mvn --batch-mode verify` the canonical build command.
 
 ### Fixed
