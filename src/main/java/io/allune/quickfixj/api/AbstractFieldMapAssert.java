@@ -17,6 +17,7 @@ import io.allune.quickfixj.internal.Dictionaries;
 import io.allune.quickfixj.internal.Messages;
 import io.allune.quickfixj.internal.Versions;
 import org.assertj.core.api.AbstractAssert;
+import org.assertj.core.api.InstanceOfAssertFactory;
 import org.assertj.core.internal.Failures;
 import quickfix.FieldMap;
 import quickfix.Group;
@@ -233,6 +234,31 @@ public abstract class AbstractFieldMapAssert<SELF extends AbstractFieldMapAssert
 		messages.assertDecimalFieldHasValue(
 				info, actual, expectedFieldTag, getBeginString(), expectedFieldValue, dictionaries);
 		return (SELF) this;
+	}
+
+	/**
+	 * Extracts a dictionary-converted FIX field value into the specialized assertion selected by an AssertJ factory.
+	 *
+	 * @param fieldTag the tag number of the field to extract
+	 * @param assertFactory the factory that selects the returned AssertJ assertion type
+	 * @param <ASSERT> the specialized AssertJ assertion type
+	 * @return an assertion over the converted field value
+	 */
+	public <ASSERT extends AbstractAssert<?, ?>> ASSERT extractingFieldValue(
+			int fieldTag, InstanceOfAssertFactory<?, ASSERT> assertFactory) {
+		isNotNull();
+
+		if (fieldTag <= 0) {
+			throw new IllegalArgumentException("'fieldTag' must be greater than 0");
+		}
+
+		if (assertFactory == null) {
+			throw new IllegalArgumentException("'assertFactory' must not be null.");
+		}
+
+		hasField(fieldTag);
+		return messages.extractFieldValue(
+				info, actual, fieldTag, getBeginString(), dictionaries, assertFactory);
 	}
 
 	/**

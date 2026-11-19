@@ -14,7 +14,9 @@ package io.allune.quickfixj.internal;
 
 import io.allune.quickfixj.exception.FieldNotFoundException;
 import io.allune.quickfixj.exception.ThrownByLambdaException;
+import org.assertj.core.api.AbstractAssert;
 import org.assertj.core.api.AssertionInfo;
+import org.assertj.core.api.InstanceOfAssertFactory;
 import org.assertj.core.internal.Failures;
 import org.assertj.core.internal.Objects;
 import quickfix.BooleanField;
@@ -48,6 +50,7 @@ import static io.allune.quickfixj.error.FieldShouldHaveDecimalValue.decimalField
 import static io.allune.quickfixj.error.FieldShouldHaveDecimalValue.fieldShouldHaveDecimalValue;
 import static io.allune.quickfixj.error.UnsupportedFieldType.unsupportedFieldType;
 import static io.allune.quickfixj.error.FieldShouldHaveValue.fieldShouldHaveValue;
+import static io.allune.quickfixj.error.FieldValueExtractionFailed.fieldValueExtractionFailed;
 import static io.allune.quickfixj.error.ShouldBeOfType.shouldBeOfType;
 import static io.allune.quickfixj.error.ShouldHaveField.shouldHaveField;
 import static quickfix.FixVersions.BEGINSTRING_FIXT11;
@@ -254,6 +257,58 @@ public class Messages {
 		} catch (FieldNotFound e) {
 			throw new FieldNotFoundException(e.getMessage(), e);
 		}
+	}
+
+	public <ASSERT extends AbstractAssert<?, ?>> ASSERT extractFieldValue(AssertionInfo info, FieldMap actual,
+			int fieldTag, String beginString, Dictionaries dictionaries,
+			InstanceOfAssertFactory<?, ASSERT> assertFactory) {
+		DataDictionary dataDictionary = dictionaries.getSessionDataDictionary(beginString);
+		FieldType fieldType = dataDictionary.getFieldType(fieldTag);
+		String fieldName = dataDictionary.getFieldName(fieldTag);
+		String displayName = fieldName == null ? "unknown" : fieldName;
+		String displayType = fieldType == null ? "unknown" : fieldType.name();
+		String rawValue;
+
+		try {
+			rawValue = actual.getString(fieldTag);
+		} catch (FieldNotFound fieldNotFound) {
+			throw failures.failure(info, shouldHaveField(actual, fieldTag));
+		}
+
+		if (fieldType == null) {
+			throw failures.failure(info, fieldValueExtractionFailed(actual, displayName, fieldTag, displayType,
+					rawValue, assertFactory, "the active data dictionary does not define this field"));
+		}
+
+		Object fieldValue;
+		try {
+			fieldValue = getFieldValue(fieldTag, beginString, actual, dictionaries);
+		} catch (FieldNotFoundException fieldNotFound) {
+			throw failures.failure(info, shouldHaveField(actual, fieldTag));
+		} catch (RuntimeException conversionFailure) {
+			String problem = conversionFailure.getClass().getSimpleName() + ": " + conversionFailure.getMessage();
+			throw failures.failure(info, fieldValueExtractionFailed(
+					actual, displayName, fieldTag, displayType, rawValue, assertFactory, problem));
+		}
+
+		ASSERT fieldAssert;
+		try {
+			fieldAssert = assertFactory.createAssert(fieldValue);
+		} catch (AssertionError | RuntimeException factoryFailure) {
+			String fieldValueType = fieldValue == null ? "null" : fieldValue.getClass().getName();
+			String problem = "converted value " + fieldValue + " of type " + fieldValueType
+					+ " was rejected by the assertion factory: " + factoryFailure.getMessage();
+			throw failures.failure(info, fieldValueExtractionFailed(
+					actual, displayName, fieldTag, displayType, rawValue, assertFactory, problem));
+		}
+
+		if (fieldAssert == null) {
+			throw failures.failure(info, fieldValueExtractionFailed(actual, displayName, fieldTag, displayType,
+					rawValue, assertFactory, "the assertion factory returned null"));
+		}
+
+		fieldAssert.as("FIX field %s (tag %s)", displayName, fieldTag);
+		return fieldAssert;
 	}
 
 	public void assertDecimalFieldHasValue(AssertionInfo info, FieldMap actual, int fieldTag, String beginString,

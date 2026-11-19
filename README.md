@@ -16,6 +16,7 @@ Plain QuickFIX/J tests often repeat tag lookups, conversions, and hand-written e
 - Header and trailer chaining with `header()`, `trailer()`, and `and()`.
 - Dictionary-aware, typed `hasFieldValue(tag, value)` checks.
 - Exact, dictionary-aware decimal checks with `hasDecimalFieldValue(tag, BigDecimal)`.
+- Typed field extraction into standard AssertJ assertions.
 - SessionID, sequence, reject, Logon, and ExecutionReport field assertions.
 - Repeating-group counts, entries, and nested groups.
 - Assertion-scoped custom dictionaries for parallel test safety.
@@ -91,6 +92,26 @@ assertThat(message)
 ```
 
 The field must have a `PRICE`, `AMT`, `QTY`, `FLOAT`, `PRICEOFFSET`, or `PERCENTAGE` type in the active session or FIXT application dictionary. Values are compared numerically, so decimal scale is not significant: `1.0` and `1.00` are equal. Conversion failures identify the tag, dictionary field name and type, raw FIX value, expected value, and conversion problem. Existing `hasFieldValue(tag, value)` calls retain their `Double`-based behavior for these FIX types.
+
+## Typed field extraction
+
+Use AssertJ instance-of factories when a field needs richer assertions than equality:
+
+```java
+import static org.assertj.core.api.InstanceOfAssertFactories.DOUBLE;
+import static org.assertj.core.api.InstanceOfAssertFactories.STRING;
+
+assertThat(message)
+    .extractingFieldValue(Symbol.FIELD, STRING)
+    .startsWith("AAP");
+
+assertThat(message)
+    .extractingFieldValue(OrderQty.FIELD, DOUBLE)
+    .isPositive()
+    .isLessThan(1_000.0);
+```
+
+`extractingFieldValue` uses the active dictionary and returns the specialized assertion selected by the factory. It works for message bodies, headers, trailers, and repeating groups, including assertion-scoped custom and FIXT application dictionaries. General decimal extraction retains the existing `Double` representation; use `hasDecimalFieldValue` when exact `BigDecimal` equality is required.
 
 
 ## Headers and trailers

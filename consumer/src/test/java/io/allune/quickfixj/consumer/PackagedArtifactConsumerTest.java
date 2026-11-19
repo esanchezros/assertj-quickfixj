@@ -24,6 +24,7 @@ import quickfix.field.Symbol;
 import java.math.BigDecimal;
 
 import static io.allune.quickfixj.api.Assertions.assertThat;
+import static org.assertj.core.api.InstanceOfAssertFactories.STRING;
 
 public class PackagedArtifactConsumerTest {
 
@@ -51,5 +52,9 @@ public class PackagedArtifactConsumerTest {
                     .hasFieldValue(PartyID.FIELD, "CLIENT")
                 .and()
                 .isNewOrderSingle();
+
+        assertThat(message)
+                .extractingFieldValue(Symbol.FIELD, STRING)
+                .startsWith("AAP");
     }
 }
