@@ -10,6 +10,7 @@ Notable changes follow semantic versioning intent.
 - Exact-decimal conversion failures now report the tag, dictionary field name and type, raw value, expected value, and conversion problem.
 - Added `extractingFieldValue(tag, InstanceOfAssertFactory)` to compose dictionary-converted FIX values with specialized standard AssertJ assertions across messages, headers, trailers, and repeating groups.
 - Typed extraction failures now identify the tag, dictionary field name and type, raw value, assertion factory, and conversion or factory mismatch.
+- Added `anyGroupSatisfies(tag, requirements)` to locate repeating-group entries by dictionary-aware assertions across messages, headers, trailers, and nested groups, with per-entry mismatch diagnostics.
 
 ### Compatibility
 

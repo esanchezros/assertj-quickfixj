@@ -160,7 +160,22 @@ assertThat(executionReport)
     .isExecutionReport();
 ```
 
-QuickFIX/J components are flattened into their containing `FieldMap`, so component fields use the normal `hasField`, `doesNotHaveField`, and `hasFieldValue` assertions. Nested repeating groups use the same `group` API.
+When the entry's position is not part of the expected behavior, select it by content:
+
+```java
+assertThat(executionReport)
+    .anyGroupSatisfies(NoPartyIDs.FIELD, party -> party
+        .hasFieldValue(PartyID.FIELD, "CLIENT")
+        .hasFieldValue(PartyRole.FIELD, 11)
+        .anyGroupSatisfies(NoPartySubIDs.FIELD, subId -> subId
+            .hasFieldValue(PartySubID.FIELD, "DESK-1")))
+    .isExecutionReport();
+```
+
+If no entry matches, the failure reports the group tag and the assertion failure for each one-based candidate index.
+Unexpected runtime exceptions from the callback are not treated as mismatches.
+
+QuickFIX/J components are flattened into their containing `FieldMap`, so component fields use the normal `hasField`, `doesNotHaveField`, and `hasFieldValue` assertions. Nested repeating groups support the same indexed and content-based APIs.
 
 ## Message names and FIXT 1.1
 

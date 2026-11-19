@@ -74,11 +74,15 @@ public class MessageAssert_DictionaryIsolation_Test {
 	public void applicationDictionaryShouldBeScopedForFixtMessages() throws Exception {
 		Message message = customMessage("FIXT.1.1");
 		message.getHeader().setString(ApplVerID.FIELD, ApplVerID.FIX50SP2);
+		Group group = new Group(453, CUSTOM_FIELD);
+		group.setString(CUSTOM_FIELD, "7");
+		message.addGroup(group);
 
 		assertThat(message)
 				.withApplicationDataDictionary(ApplVerID.FIX50SP2, dictionaryWithCustomFieldType("INT"))
 				.isVersion50sp2()
-				.hasFieldValue(CUSTOM_FIELD, 7);
+				.hasFieldValue(CUSTOM_FIELD, 7)
+				.anyGroupSatisfies(453, entry -> entry.hasFieldValue(CUSTOM_FIELD, 7));
 	}
 
 	@Test
@@ -110,6 +114,19 @@ public class MessageAssert_DictionaryIsolation_Test {
 				.header().hasFieldValue(CUSTOM_FIELD, 7).and()
 				.trailer().hasFieldValue(CUSTOM_FIELD, 7).and()
 				.group(453, 1).hasFieldValue(CUSTOM_FIELD, 7).and();
+	}
+
+	@Test
+	public void scopedDictionaryShouldPropagateToContentBasedGroupAssertions() throws Exception {
+		DataDictionary dictionary = dictionaryWithCustomFieldType("INT");
+		Message message = customMessage("FIX.4.4");
+		Group group = new Group(453, CUSTOM_FIELD);
+		group.setString(CUSTOM_FIELD, "7");
+		message.addGroup(group);
+
+		assertThat(message)
+				.withDataDictionary("FIX.4.4", dictionary)
+				.anyGroupSatisfies(453, entry -> entry.hasFieldValue(CUSTOM_FIELD, 7));
 	}
 
 	@Test

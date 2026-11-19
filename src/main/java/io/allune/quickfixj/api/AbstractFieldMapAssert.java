@@ -23,8 +23,12 @@ import quickfix.FieldMap;
 import quickfix.Group;
 
 import java.math.BigDecimal;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.function.Consumer;
 
 import static io.allune.quickfixj.error.FieldShouldHaveValue.fieldShouldHaveValue;
+import static io.allune.quickfixj.error.ShouldHaveGroupSatisfying.shouldHaveGroupSatisfying;
 import static io.allune.quickfixj.error.ShouldHaveGroup.shouldHaveGroup;
 import static io.allune.quickfixj.error.ShouldHaveGroupCount.shouldHaveGroupCount;
 import static io.allune.quickfixj.error.ShouldHaveField.shouldHaveField;
@@ -166,6 +170,40 @@ public abstract class AbstractFieldMapAssert<SELF extends AbstractFieldMapAssert
 		} catch (quickfix.FieldNotFound fieldNotFound) {
 			throw failures.failure(info, shouldHaveGroup(actual, groupTag, index, actual.getGroupCount(groupTag)));
 		}
+	}
+
+	/**
+	 * Verifies that at least one entry in a repeating group satisfies the supplied assertions.
+	 * <p>
+	 * Entries are inspected in QuickFIX/J's one-based group order. Assertion failures are treated as non-matches;
+	 * unexpected runtime exceptions from {@code requirements} are propagated unchanged.
+	 *
+	 * @param groupTag the repeating-group count tag
+	 * @param requirements the assertions to apply to each group entry
+	 * @return {@code this} assertion object
+	 */
+	public SELF anyGroupSatisfies(int groupTag, Consumer<? super GroupAssert<SELF>> requirements) {
+		isNotNull();
+		if (groupTag <= 0) {
+			throw new IllegalArgumentException("'groupTag' must be greater than 0");
+		}
+		if (requirements == null) {
+			throw new IllegalArgumentException("'requirements' must not be null.");
+		}
+
+		hasGroup(groupTag);
+		int groupCount = actual.getGroupCount(groupTag);
+		List<String> assertionFailures = new ArrayList<>();
+		for (int index = 1; index <= groupCount; index++) {
+			try {
+				requirements.accept(group(groupTag, index));
+				return (SELF) this;
+			} catch (AssertionError assertionFailure) {
+				assertionFailures.add(assertionFailure.getMessage());
+			}
+		}
+
+		throw failures.failure(info, shouldHaveGroupSatisfying(actual, groupTag, assertionFailures));
 	}
 
 	/**
