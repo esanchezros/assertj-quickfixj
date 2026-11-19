@@ -18,7 +18,10 @@ import quickfix.Message;
 import quickfix.SessionID;
 import quickfix.field.NoPartyIDs;
 import quickfix.field.PartyID;
+import quickfix.field.Price;
 import quickfix.field.Symbol;
+
+import java.math.BigDecimal;
 
 import static io.allune.quickfixj.api.Assertions.assertThat;
 
@@ -32,6 +35,7 @@ public class PackagedArtifactConsumerTest {
         message.getHeader().setString(49, "CLIENT");
         message.getHeader().setString(56, "BROKER");
         message.setString(Symbol.FIELD, "AAPL");
+        message.setString(Price.FIELD, "12345678901234567890.123456789");
         Group party = new Group(NoPartyIDs.FIELD, PartyID.FIELD);
         party.setString(PartyID.FIELD, "CLIENT");
         message.addGroup(party);
@@ -41,7 +45,7 @@ public class PackagedArtifactConsumerTest {
                 .isNewOrderSingle()
                 .hasSessionID(new SessionID("FIX.4.4", "CLIENT", "BROKER"))
                 .hasFieldValue(Symbol.FIELD, "AAPL")
-                .doesNotHaveField(44)
+                .hasDecimalFieldValue(Price.FIELD, new BigDecimal("12345678901234567890.123456789"))
                 .hasGroupCount(NoPartyIDs.FIELD, 1)
                 .group(NoPartyIDs.FIELD, 1)
                     .hasFieldValue(PartyID.FIELD, "CLIENT")

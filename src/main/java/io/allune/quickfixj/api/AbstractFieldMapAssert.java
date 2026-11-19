@@ -21,6 +21,8 @@ import org.assertj.core.internal.Failures;
 import quickfix.FieldMap;
 import quickfix.Group;
 
+import java.math.BigDecimal;
+
 import static io.allune.quickfixj.error.FieldShouldHaveValue.fieldShouldHaveValue;
 import static io.allune.quickfixj.error.ShouldHaveGroup.shouldHaveGroup;
 import static io.allune.quickfixj.error.ShouldHaveGroupCount.shouldHaveGroupCount;
@@ -201,6 +203,35 @@ public abstract class AbstractFieldMapAssert<SELF extends AbstractFieldMapAssert
 			}
 		}
 
+		return (SELF) this;
+	}
+
+	/**
+	 * Verifies that a decimal FIX field has the expected exact numeric value.
+	 * <p>
+	 * The raw FIX value is converted directly to {@link BigDecimal}. Values are compared numerically, so scale is not
+	 * significant: for example, {@code 1.0} and {@code 1.00} are equal. The field must use one of the decimal FIX
+	 * dictionary types: {@code PRICE}, {@code AMT}, {@code QTY}, {@code FLOAT}, {@code PRICEOFFSET}, or
+	 * {@code PERCENTAGE}.
+	 *
+	 * @param expectedFieldTag the expected tag number of the field
+	 * @param expectedFieldValue the expected exact decimal value
+	 * @return {@code this} assertion object
+	 */
+	public SELF hasDecimalFieldValue(int expectedFieldTag, BigDecimal expectedFieldValue) {
+		isNotNull();
+
+		if (expectedFieldTag <= 0) {
+			throw new IllegalArgumentException("'expectedFieldTag' must be greater than 0");
+		}
+
+		if (expectedFieldValue == null) {
+			throw new IllegalArgumentException("'expectedFieldValue' must not be null.");
+		}
+
+		hasField(expectedFieldTag);
+		messages.assertDecimalFieldHasValue(
+				info, actual, expectedFieldTag, getBeginString(), expectedFieldValue, dictionaries);
 		return (SELF) this;
 	}
 

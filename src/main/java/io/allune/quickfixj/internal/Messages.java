@@ -39,10 +39,13 @@ import quickfix.field.ApplVerID;
 import quickfix.field.BeginString;
 import quickfix.field.MsgType;
 
+import java.math.BigDecimal;
 import java.util.HashMap;
 import java.util.Map;
 
 import static io.allune.quickfixj.error.FieldShouldHaveTag.fieldShouldHaveTag;
+import static io.allune.quickfixj.error.FieldShouldHaveDecimalValue.decimalFieldConversionFailed;
+import static io.allune.quickfixj.error.FieldShouldHaveDecimalValue.fieldShouldHaveDecimalValue;
 import static io.allune.quickfixj.error.UnsupportedFieldType.unsupportedFieldType;
 import static io.allune.quickfixj.error.FieldShouldHaveValue.fieldShouldHaveValue;
 import static io.allune.quickfixj.error.ShouldBeOfType.shouldBeOfType;
@@ -251,5 +254,52 @@ public class Messages {
 		} catch (FieldNotFound e) {
 			throw new FieldNotFoundException(e.getMessage(), e);
 		}
+	}
+
+	public void assertDecimalFieldHasValue(AssertionInfo info, FieldMap actual, int fieldTag, String beginString,
+			BigDecimal expectedValue, Dictionaries dictionaries) {
+		DataDictionary dataDictionary = dictionaries.getSessionDataDictionary(beginString);
+		FieldType fieldType = dataDictionary.getFieldType(fieldTag);
+		String fieldName = dataDictionary.getFieldName(fieldTag);
+		String displayName = fieldName == null ? "unknown" : fieldName;
+		String displayType = fieldType == null ? "unknown" : fieldType.name();
+		String rawValue;
+
+		try {
+			rawValue = actual.getString(fieldTag);
+		} catch (FieldNotFound fieldNotFound) {
+			throw failures.failure(info, shouldHaveField(actual, fieldTag));
+		}
+
+		if (!isDecimalFieldType(fieldType)) {
+			String problem = fieldType == null
+					? "the active data dictionary does not define this field"
+					: "dictionary type " + fieldType.name() + " is not an exact-decimal FIX type";
+			throw failures.failure(info, decimalFieldConversionFailed(
+					actual, displayName, fieldTag, displayType, rawValue, expectedValue, problem));
+		}
+
+		BigDecimal actualValue;
+		try {
+			actualValue = new BigDecimal(rawValue);
+		} catch (NumberFormatException conversionFailure) {
+			String problem = conversionFailure.getClass().getSimpleName() + ": " + conversionFailure.getMessage();
+			throw failures.failure(info, decimalFieldConversionFailed(
+					actual, displayName, fieldTag, displayType, rawValue, expectedValue, problem));
+		}
+
+		if (expectedValue.compareTo(actualValue) != 0) {
+			throw failures.failure(info, fieldShouldHaveDecimalValue(
+					actual, displayName, fieldTag, displayType, rawValue, expectedValue));
+		}
+	}
+
+	private boolean isDecimalFieldType(FieldType fieldType) {
+		return fieldType == FieldType.PRICE
+				|| fieldType == FieldType.AMT
+				|| fieldType == FieldType.QTY
+				|| fieldType == FieldType.FLOAT
+				|| fieldType == FieldType.PRICEOFFSET
+				|| fieldType == FieldType.PERCENTAGE;
 	}
 }
