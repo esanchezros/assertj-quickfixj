@@ -4,6 +4,15 @@ Notable changes follow semantic versioning intent.
 
 ## [Unreleased]
 
+### Added
+
+- Added `hasDecimalFieldValue(tag, BigDecimal)` for exact `PRICE`, `AMT`, `QTY`, `FLOAT`, `PRICEOFFSET`, and `PERCENTAGE` assertions across messages, headers, trailers, and repeating groups. Decimal scale is ignored during numeric comparison.
+- Exact-decimal conversion failures now report the tag, dictionary field name and type, raw value, expected value, and conversion problem.
+
+### Compatibility
+
+- Existing `hasFieldValue(tag, value)` decimal handling remains `Double`-based and behaviorally unchanged.
+
 ## [1.1.0] - 2026-11-17
 
 ### Added

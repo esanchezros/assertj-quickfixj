@@ -15,6 +15,7 @@ Plain QuickFIX/J tests often repeat tag lookups, conversions, and hand-written e
 - Semantic message methods such as `isNewOrderSingle()` and `isExecutionReport()`.
 - Header and trailer chaining with `header()`, `trailer()`, and `and()`.
 - Dictionary-aware, typed `hasFieldValue(tag, value)` checks.
+- Exact, dictionary-aware decimal checks with `hasDecimalFieldValue(tag, BigDecimal)`.
 - SessionID, sequence, reject, Logon, and ExecutionReport field assertions.
 - Repeating-group counts, entries, and nested groups.
 - Assertion-scoped custom dictionaries for parallel test safety.
@@ -76,6 +77,20 @@ assertThat(message)
     .hasFieldValue(Side.FIELD, Side.BUY)
     .hasFieldValue(OrdType.FIELD, OrdType.LIMIT);
 ```
+
+## Exact decimal values
+
+Use `hasDecimalFieldValue` for financial values that must not pass through binary floating point:
+
+```java
+import java.math.BigDecimal;
+import quickfix.field.Price;
+
+assertThat(message)
+    .hasDecimalFieldValue(Price.FIELD, new BigDecimal("12345678901234567890.123456789"));
+```
+
+The field must have a `PRICE`, `AMT`, `QTY`, `FLOAT`, `PRICEOFFSET`, or `PERCENTAGE` type in the active session or FIXT application dictionary. Values are compared numerically, so decimal scale is not significant: `1.0` and `1.00` are equal. Conversion failures identify the tag, dictionary field name and type, raw FIX value, expected value, and conversion problem. Existing `hasFieldValue(tag, value)` calls retain their `Double`-based behavior for these FIX types.
 
 
 ## Headers and trailers
