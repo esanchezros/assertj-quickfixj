@@ -52,6 +52,96 @@ public class MessageAssert_RepeatingGroups_Test {
 	}
 
 	@Test
+	public void shouldFindAGroupEntryByItsContentsAndContinueTheParentChain() {
+		Message message = executionReportWithParties();
+
+		assertThat(message)
+				.anyGroupSatisfies(NoPartyIDs.FIELD, party -> party
+						.hasFieldValue(PartyID.FIELD, "BROKER")
+						.hasFieldValue(PartyRole.FIELD, 1))
+				.isExecutionReport();
+	}
+
+	@Test
+	public void shouldApplyContentAssertionsToNestedGroups() {
+		Message message = executionReportWithParties();
+
+		assertThat(message).anyGroupSatisfies(NoPartyIDs.FIELD, party -> party
+				.hasFieldValue(PartyID.FIELD, "CLIENT")
+				.anyGroupSatisfies(NoPartySubIDs.FIELD, subId -> subId
+						.hasFieldValue(PartySubID.FIELD, "DESK-1")
+						.hasFieldValue(PartySubIDType.FIELD, 5)));
+	}
+
+	@Test
+	public void shouldReportWhyEveryGroupEntryFailed() {
+		Message message = executionReportWithParties();
+
+		assertThatThrownBy(() -> assertThat(message)
+				.anyGroupSatisfies(NoPartyIDs.FIELD,
+						party -> party.hasFieldValue(PartyID.FIELD, "UNKNOWN")))
+				.isInstanceOf(AssertionError.class)
+				.hasMessageContaining("repeating group with tag <453>")
+				.hasMessageContaining("none of the <2> entries matched")
+				.hasMessageContaining("index <1>")
+				.hasMessageContaining("index <2>")
+				.hasMessageContaining("<\"CLIENT\">")
+				.hasMessageContaining("<\"BROKER\">");
+	}
+
+	@Test
+	public void shouldUseTheMissingGroupDiagnosticWhenThereAreNoEntries() {
+		Message message = executionReportWithParties();
+
+		assertThatThrownBy(() -> assertThat(message).anyGroupSatisfies(627, group -> group.isNotNull()))
+				.isInstanceOf(AssertionError.class)
+				.hasMessageContaining("repeating group with tag <627> at index <1>")
+				.hasMessageContaining("group count was <0>");
+	}
+
+	@Test
+	public void shouldValidateContentBasedGroupArguments() {
+		Message message = executionReportWithParties();
+
+		assertThatThrownBy(() -> assertThat(message).anyGroupSatisfies(0, group -> group.isNotNull()))
+				.isInstanceOf(IllegalArgumentException.class)
+				.hasMessage("'groupTag' must be greater than 0");
+		assertThatThrownBy(() -> assertThat(message).anyGroupSatisfies(NoPartyIDs.FIELD, null))
+				.isInstanceOf(IllegalArgumentException.class)
+				.hasMessage("'requirements' must not be null.");
+	}
+
+	@Test
+	public void shouldPropagateUnexpectedCallbackFailures() {
+		Message message = executionReportWithParties();
+		RuntimeException callbackFailure = new IllegalStateException("callback failed");
+
+		assertThatThrownBy(() -> assertThat(message)
+				.anyGroupSatisfies(NoPartyIDs.FIELD, group -> {
+					throw callbackFailure;
+				}))
+				.isSameAs(callbackFailure);
+	}
+
+	@Test
+	public void shouldSupportGroupsInHeadersAndTrailers() {
+		Message message = executionReportWithParties();
+		Group headerGroup = new Group(627, PartyID.FIELD);
+		headerGroup.setString(PartyID.FIELD, "HEADER");
+		message.getHeader().addGroup(headerGroup);
+		Group trailerGroup = new Group(627, PartyID.FIELD);
+		trailerGroup.setString(PartyID.FIELD, "TRAILER");
+		message.getTrailer().addGroup(trailerGroup);
+
+		assertThat(message)
+				.header()
+					.anyGroupSatisfies(627, group -> group.hasFieldValue(PartyID.FIELD, "HEADER"))
+				.and()
+				.trailer()
+					.anyGroupSatisfies(627, group -> group.hasFieldValue(PartyID.FIELD, "TRAILER"));
+	}
+
+	@Test
 	public void shouldReportExpectedAndActualGroupCount() {
 		Message message = executionReportWithParties();
 

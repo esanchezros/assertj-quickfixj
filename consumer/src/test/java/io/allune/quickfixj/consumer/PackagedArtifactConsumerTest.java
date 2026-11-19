@@ -51,6 +51,8 @@ public class PackagedArtifactConsumerTest {
                 .group(NoPartyIDs.FIELD, 1)
                     .hasFieldValue(PartyID.FIELD, "CLIENT")
                 .and()
+                .anyGroupSatisfies(NoPartyIDs.FIELD,
+                        entry -> entry.hasFieldValue(PartyID.FIELD, "CLIENT"))
                 .isNewOrderSingle();
 
         assertThat(message)
